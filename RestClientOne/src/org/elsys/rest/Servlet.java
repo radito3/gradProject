@@ -52,10 +52,8 @@ public class Servlet extends HttpServlet {
 		response.getWriter().append("Servlet Two response: " + message);
 	}
 
-	// something
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
-		
 		doGet(request, response);
 	}
 

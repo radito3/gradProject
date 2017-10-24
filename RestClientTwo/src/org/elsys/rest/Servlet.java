@@ -20,6 +20,10 @@ public class Servlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
+		
+		//not using the headers right now
+		response.addHeader("ServeTimes", "" + counter.getAndIncrement());
+		
 		response.getWriter().append("Served " + counter.getAndIncrement() + " times");
 	}
 
