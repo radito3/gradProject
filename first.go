@@ -12,7 +12,7 @@ type BasicPlugin struct{}
 // plugin interface defined by the core CLI.
 func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	if args[0] == "get-response" {
-		resp, err := http.Get("https://servletOne.cfapps.io/Servlet")
+		resp, err := http.Get("https://servletone.cfapps.io/Servlet")
 
 		defer resp.Body.Close()
 
