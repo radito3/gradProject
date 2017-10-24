@@ -4,31 +4,23 @@ import (
 	"fmt"
 	"net/http"
 	"code.cloudfoundry.org/cli/plugin"
-	//"io/ioutil"
 )
 
-// BasicPlugin is the struct implementing the interface defined by the core CLI. It can
-// be found at  "code.cloudfoundry.org/cli/plugin/plugin.go"
 type BasicPlugin struct{}
 
 // Run must be implemented by any plugin because it is part of the
 // plugin interface defined by the core CLI.
-//
-// Run(....) is the entry point when the core CLI is invoking a command defined
-// by a plugin. The first parameter, plugin.CliConnection, is a struct that can
-// be used to invoke cli commands. The second paramter, args, is a slice of
-// strings. args[0] will be the name of the command, and will be followed by
-// any additional arguments a cli user typed in.
 func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	if args[0] == "get-response" {
-		resp, err := http.Get("https://myservletwar.cfapps.io/FirstServlet")
+		resp, err := http.Get("https://servletOne.cfapps.io/Servlet")
+
 		defer resp.Body.Close()
+
 		if err != nil {
 			fmt.Println("sevice error: ", err)
-		} else {
-			//body, error := ioutil.ReadAll(resp)
-			fmt.Println("rest app response: ", resp)
 		}
+
+		fmt.Println("rest app response: ", resp)
 	}
 }
 
@@ -49,8 +41,8 @@ func (c *BasicPlugin) GetMetadata() plugin.PluginMetadata {
 		Name: "getResponsePlugin",
 		Version: plugin.VersionType{
 			Major: 1,
-			Minor: 0,
-			Build: 3,
+			Minor: 1,
+			Build: 0,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,
@@ -60,9 +52,9 @@ func (c *BasicPlugin) GetMetadata() plugin.PluginMetadata {
 		Commands: []plugin.Command{
 			{
 				Name:     "get-response",
-				HelpText: "plugin help text",
+				HelpText: "plugin for get request to servlet",
 				UsageDetails: plugin.Usage{
-					Usage: "get-response-plugin\n   cf get-response",
+					Usage: "cf get-response",
 				},
 			},
 		},
