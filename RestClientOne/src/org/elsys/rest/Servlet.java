@@ -1,7 +1,11 @@
 package org.elsys.rest;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.ServletException;
@@ -34,7 +38,12 @@ public class Servlet extends HttpServlet {
  		//add request header
  		con.setRequestProperty("User-Agent", USER_AGENT);
  		
- 		return con.getResponseMessage();
+ 		InputStream in = con.getInputStream();
+
+ 		String result = new BufferedReader(new InputStreamReader(in))
+ 				  .lines().collect(Collectors.joining("\n"));
+ 		
+ 		return result;
 
  	}
     
