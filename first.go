@@ -14,13 +14,17 @@ type BasicPlugin struct{}
 func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	if args[0] == "get-response" {
 		resp, err := http.Get("https://servletone.cfapps.io/Servlet")
+		if err != nil {
+                        fmt.Println("sevice error: ", err)
+			return nil;
+			//Handle the error of the function before operating
+			//with it's result, as the result is probably faulty 
+                }
 		bs, err1 := ioutil.ReadAll(resp.Body)
 
 		defer resp.Body.Close()
 
-		if err != nil {
-			fmt.Println("sevice error: ", err)
-		} else if err1 != nil {
+		if err1 != nil {
 			fmt.Println("sevice error: ", err1)
 		}
 

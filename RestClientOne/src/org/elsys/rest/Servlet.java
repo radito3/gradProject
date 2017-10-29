@@ -26,7 +26,7 @@ public class Servlet extends HttpServlet {
     
     // HTTP GET request
  	private String sendGet() throws Exception {
-
+ 		//TODO read this from the app's environment e.g. a pre-defined variable
  		String url = "https://servlettwo.cfapps.io/Servlet";
 
  		URL obj = new URL(url);
@@ -38,10 +38,16 @@ public class Servlet extends HttpServlet {
  		//add request header
  		con.setRequestProperty("User-Agent", USER_AGENT);
  		
+ 		//TODO always close the stream's used in your codes. 
+ 		//OS handles may be left non-returned and the kernel might restrict access to resources 
+ 		//or crash if it's handles are depleted
+ 		//You may do it with a try, initializing an AutoCloseable e.g.
+ 		// 		try (InputStream in = con.getInputStream()){
+ 		// 	 		;}
  		InputStream in = con.getInputStream();
-
+ 		
  		String result = new BufferedReader(new InputStreamReader(in))
- 				  .lines().collect(Collectors.joining("\n"));
+ 				  .lines().collect(Collectors.joining("\n"));//cool :)
  		
  		return result;
 
