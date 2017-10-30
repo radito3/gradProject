@@ -12,41 +12,38 @@ type BasicPlugin struct{}
 // Run must be implemented by any plugin because it is part of the
 // plugin interface defined by the core CLI.
 func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
+	// commands for the package manager will be handled here?
 	if args[0] == "get-response" {
+		// url will be changed
 		resp, err := http.Get("https://servletone.cfapps.io/Servlet")
-		bs, err1 := ioutil.ReadAll(resp.Body)
+
+		if err != nil {
+			fmt.Println("Sevice error: ", err)
+			return
+		}
 
 		defer resp.Body.Close()
 
-		if err != nil {
-			fmt.Println("sevice error: ", err)
-		} else if err1 != nil {
-			fmt.Println("sevice error: ", err1)
+		bs, readErr := ioutil.ReadAll(resp.Body)
+
+		if readErr != nil {
+			fmt.Println("Sevice error: ", readErr)
+			return
 		}
 
-		fmt.Println("Servlet One Response: ", string(bs))
+		fmt.Println("Client One Response: ", string(bs))
 	}
 }
 
 // GetMetadata must be implemented as part of the plugin interface
 // defined by the core CLI.
-//
-// GetMetadata() returns a PluginMetadata struct. The first field, Name,
-// determines the name of the plugin which should generally be without spaces.
-// If there are spaces in the name a user will need to properly quote the name
-// during uninstall otherwise the name will be treated as seperate arguments.
-// The second value is a slice of Command structs. Our slice only contains one
-// Command Struct, but could contain any number of them. The first field Name
-// defines the command `cf basic-plugin-command` once installed into the CLI. The
-// second field, HelpText, is used by the core CLI to display help information
-// to the user in the core commands `cf help`, `cf`, or `cf -h`.
 func (c *BasicPlugin) GetMetadata() plugin.PluginMetadata {
 	return plugin.PluginMetadata{
 		Name: "getResponsePlugin",
 		Version: plugin.VersionType{
 			Major: 1,
 			Minor: 1,
-			Build: 0,
+			Build: 1,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,
@@ -56,7 +53,7 @@ func (c *BasicPlugin) GetMetadata() plugin.PluginMetadata {
 		Commands: []plugin.Command{
 			{
 				Name:     "get-response",
-				HelpText: "plugin for get request to servlet",
+				HelpText: "plugin for get request to rest client",
 				UsageDetails: plugin.Usage{
 					Usage: "cf get-response",
 				},
@@ -65,10 +62,8 @@ func (c *BasicPlugin) GetMetadata() plugin.PluginMetadata {
 	}
 }
 
-// Unlike most Go programs, the `Main()` function will not be used to run all of the
-// commands provided in your plugin. Main will be used to initialize the plugin
-// process, as well as any dependencies you might require for your
-// plugin.
+// Main will be used to initialize the plugin process,
+// as well as any dependencies you might require for your plugin.
 func main() {
 	// Any initialization for your plugin can be handled here
 	//
