@@ -24,4 +24,5 @@
       </plugin>
     </plugins>
   </build>
+  <!-- TODO you'd have to list the dependencies of your project here -->
 </project>

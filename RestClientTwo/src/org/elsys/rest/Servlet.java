@@ -27,6 +27,7 @@ public class Servlet extends HttpServlet {
 		response.getWriter().append("Served " + counter.getAndIncrement() + " times");
 	}
 
+	// Post methods are generally used to update a (rest) resource. The way it's persisted should not matter. 
 	// with Database
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
