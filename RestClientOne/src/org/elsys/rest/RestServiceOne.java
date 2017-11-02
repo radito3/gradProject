@@ -9,10 +9,12 @@ import java.util.stream.Collectors;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-public class RestClient {
+@Path("/Test")
+public class RestServiceOne {
 
 	private final String USER_AGENT = "Mozilla/5.0";
 	
@@ -22,7 +24,7 @@ public class RestClient {
 		String result = "Client Two response: ";
 		
 		try {
-			URL obj = new URL("https://servlettwo.cfapps.io/Servlet");
+			URL obj = new URL("https://servlettwo.cfapps.io/Test");
 			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 	 		con.setRequestMethod("GET");
 	 		con.setRequestProperty("User-Agent", USER_AGENT);

@@ -12,10 +12,13 @@ type BasicPlugin struct{}
 // Run must be implemented by any plugin because it is part of the
 // plugin interface defined by the core CLI.
 func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
-	// commands for the package manager will be handled here?
+	if len(args) < 2 {
+		fmt.Println("Incorrect usage.\nUsage: cf get-response <uri>")
+	}
+	// commands for the package manager will be handled here
 	if args[0] == "get-response" {
 		// url will be changed
-		resp, err := http.Get("https://servletone.cfapps.io/Servlet")
+		resp, err := http.Get(args[1])
 
 		if err != nil {
 			fmt.Println("Sevice error: ", err)
@@ -31,7 +34,7 @@ func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 			return
 		}
 
-		fmt.Println("Client One Response: ", string(bs))
+		fmt.Println("Service One Response: ", string(bs))
 	}
 }
 
