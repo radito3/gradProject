@@ -16,8 +16,7 @@ func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 		fmt.Println("Incorrect usage.\nUsage: cf get-response <uri>")
 	}
 	// commands for the package manager will be handled here
-	if args[0] == "get-response" {
-		// url will be changed
+	if args[0] == "get-response" {		
 		resp, err := http.Get(args[1])
 
 		if err != nil {
@@ -46,7 +45,7 @@ func (c *BasicPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType{
 			Major: 1,
 			Minor: 1,
-			Build: 1,
+			Build: 2,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,
@@ -56,7 +55,7 @@ func (c *BasicPlugin) GetMetadata() plugin.PluginMetadata {
 		Commands: []plugin.Command{
 			{
 				Name:     "get-response",
-				HelpText: "plugin for get request to rest client",
+				HelpText: "plugin for get request to rest service",
 				UsageDetails: plugin.Usage{
 					Usage: "cf get-response",
 				},

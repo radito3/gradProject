@@ -20,12 +20,14 @@ public class RestServiceOne {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getResponse() {
 		StringBuilder result = new StringBuilder();
-		result.append("Client Two response: ");
+		result.append("Service Two response: ");
 
 		try {
+			// url needs to be gotten from System.getenv()
+			// this static url is temporary
 			URL obj = new URL("https://restservicetwo.cfapps.io/rest/Test");
 			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-			
+
 	 		con.setRequestMethod("GET");
 	 		
 	 		InputStream in = con.getInputStream();
