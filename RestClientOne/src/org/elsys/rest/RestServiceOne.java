@@ -15,30 +15,29 @@ import javax.ws.rs.core.MediaType;
 
 @Path("/Test")
 public class RestServiceOne {
-
-	private final String USER_AGENT = "Mozilla/5.0";
 	
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getResponse() {
-		String result = "Client Two response: ";
-		
+		StringBuilder result = new StringBuilder();
+		result.append("Client Two response: ");
+
 		try {
-			URL obj = new URL("https://servlettwo.cfapps.io/Test");
+			URL obj = new URL("https://restservicetwo.cfapps.io/rest/Test");
 			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+			
 	 		con.setRequestMethod("GET");
-	 		con.setRequestProperty("User-Agent", USER_AGENT);
 	 		
 	 		InputStream in = con.getInputStream();
 
-	 		result += new BufferedReader(new InputStreamReader(in))
-	 				  .lines().collect(Collectors.joining("\n"));
+	 		result.append(new BufferedReader(new InputStreamReader(in))
+	 				  .lines().collect(Collectors.joining("\n")));
 	 		
 	 		in.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		return result;
+
+		return result.toString();
 	}
 }
