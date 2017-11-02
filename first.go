@@ -20,7 +20,7 @@ func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 		resp, err := http.Get(args[1])
 
 		if err != nil {
-			fmt.Println("Sevice error: ", err)
+			fmt.Println("Sevice error on Get: ", err)
 			return
 		}
 
@@ -29,7 +29,7 @@ func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 		bs, readErr := ioutil.ReadAll(resp.Body)
 
 		if readErr != nil {
-			fmt.Println("Sevice error: ", readErr)
+			fmt.Println("Sevice error on Read: ", readErr)
 			return
 		}
 
