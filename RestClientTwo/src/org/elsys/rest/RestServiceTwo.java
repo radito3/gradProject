@@ -15,7 +15,6 @@ public class RestServiceTwo {
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getResponse() {
-		// String url = System.getenv("testEnv");
 		return String.format("Called %d times", counter.getAndIncrement());
 	}
 }
