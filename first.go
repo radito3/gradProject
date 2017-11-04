@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"code.cloudfoundry.org/cli/plugin"
 	"io/ioutil"
+	//os
 )
 
 type BasicPlugin struct{}
@@ -16,7 +17,8 @@ func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 		fmt.Println("Incorrect usage.\nUsage: cf get-response <uri>")
 	}
 	// commands for the package manager will be handled here
-	if args[0] == "get-response" {		
+	if args[0] == "get-response" {
+		//uri could be from os.Getenv()
 		resp, err := http.Get(args[1])
 
 		if err != nil {
