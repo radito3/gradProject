@@ -42,24 +42,19 @@ func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 			//list available apps from repo
 
 		case args[1] == "install":
-			//if 'install' is spelled wrong ->
-			fmt.Println("Incorrect usage.\nCorrect usage: cf apm install <app_name>")
-			//check if app name is correct
-			//->if correct - install
-			//->else 
+			//check for correct app name
 			fmt.Println("Incorrect application name.")
 
 		case args[1] == "update":
-			//check for correct spelling
-			fmt.Println("Incorrect usage.\nCorrect usage: cf apm update <app_name>")
 			//check for correct app name
 			fmt.Println("Incorrect application name.")
 
 		case args[1] == "delete":
-			//check for correct spelling
-			fmt.Println("Incorrect usage.\nCorrect usage: cf apm delete <app_name>")
 			//check for correct app name
 			fmt.Println("Incorrect application name.")
+
+		default:
+			fmt.Println("Incorrect command.\nCommands are install/update/delete <app_name>")
 	}
 	
 }
