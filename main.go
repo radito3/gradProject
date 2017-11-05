@@ -20,7 +20,7 @@ func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	switch {
 		case args[1] == "test-app":
 			//uri could be from os.Getenv()
-			resp, err := http.Get(args[1])
+			resp, err := http.Get(args[2])
 		
 			if err != nil {
 				fmt.Println("Sevice error on Get: ", err)
