@@ -79,7 +79,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 				Name:     "apm",
 				HelpText: "application package manager",
 				UsageDetails: plugin.Usage{
-					Usage: "cf apm <command>",
+					Usage: "cf apm <command> [<app_name>]",
 				},
 			},
 		},
