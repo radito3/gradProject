@@ -8,13 +8,13 @@ import (
 	//os
 )
 
-type BasicPlugin struct{}
+type ApmPlugin struct{}
 
-func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
+func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 
 	if args[0] != "apm" {
 		fmt.Println("Incorrect usage.\nCorrect usage: cf apm <command>")
-		return
+		os.Exit(1)
 	}
 
 	switch {
@@ -59,7 +59,7 @@ func (c *BasicPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	
 }
 
-func (c *BasicPlugin) GetMetadata() plugin.PluginMetadata {
+func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 	return plugin.PluginMetadata {
 		Name: "apmPlugin",
 		Version: plugin.VersionType {
@@ -85,5 +85,5 @@ func (c *BasicPlugin) GetMetadata() plugin.PluginMetadata {
 }
 
 func main() {
-	plugin.Start(new(BasicPlugin))
+	plugin.Start(new(ApmPlugin))
 }
