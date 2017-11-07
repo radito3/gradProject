@@ -5,55 +5,67 @@ import (
 	"net/http"
 	"code.cloudfoundry.org/cli/plugin"
 	"io/ioutil"
-	"os"
 	"errors"
+	"strings"
 )
 
-type ApmPlugin struct{}
+type ApmPlugin struct {}
 
-func getResponse(args []string) string, error {
-	//os.Getenv() is also an option for uri
-	resp, err := http.Get(args[2])
+func getResponse(uri string) (string, error) {
+	resp, err := http.Get(uri)
 	if err != nil {
-		return "", errors.New("Sevice error on Get: ", err)
+		return "", errors.New(fmt.Sprintf("Sevice error on Get: %s", err))
 	}
 	defer resp.Body.Close()
 
 	bs, readErr := ioutil.ReadAll(resp.Body)
 	if readErr != nil {
-		return "", errors.New("Sevice error on Read: ", readErr)
+		return "", errors.New(fmt.Sprintf("Sevice error on Read: %s", readErr))
 	}
-	return string(bs)
+	return string(bs), nil
 }
 
 func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	if args[0] != "apm" {
 		fmt.Println("Incorrect usage.\nCorrect usage: cf apm <command> [<app_name>]")
-		os.Exit(1)
+		return
 	}
 	switch {
 		case args[1] == "test-app":
-			resp, err := getResponse(args)
+			app, err := cliConnection.GetApp("restServiceOne")
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			var uri = []string{"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/rest/Test"}
+			resp, err := getResponse(strings.Join(uri, ""))
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Println("Service One Response: ", resp)
+
+		case args[1] == "list-apps":
+			list, err := cliConnection.GetApps()
 			if err != nil {
 				fmt.Println(err)
 			} else {
-				fmt.Println("Service One Response: ", resp)
+				for i := 0; i < len(list); i++ {
+					fmt.Println(list[i].Name)
+				}
 			}
-
-		case args[1] == "list-apps":
-			//list available apps from repo
 
 		case args[1] == "install":
 			//check if such an app exists
-			fmt.Println("Application %s not found.", args[2])
+			fmt.Sprintln("Application %s not found", args[2])
 
 		case args[1] == "update":
 			//check if such an app exists
-			fmt.Println("Application %s not found.", args[2])
+			fmt.Sprintln("Application %s not found", args[2])
 
 		case args[1] == "delete":
 			//check if such an app exists
-			fmt.Println("Application %s not found.", args[2])
+			fmt.Sprintln("Application %s not found", args[2])
 
 		default:
 			fmt.Println("Incorrect command.\nCommands are install/update/delete <app_name>")
@@ -66,8 +78,8 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Name: "apmPlugin",
 		Version: plugin.VersionType {
 			Major: 2,
-			Minor: 0,
-			Build: 0,
+			Minor: 2,
+			Build: 1,
 		},
 		MinCliVersion: plugin.VersionType {
 			Major: 6,

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo -e "Installing apm plugin..."
+
+rm ~/Desktop/Repos/gradProject/main
+
+go build ~/Desktop/Repos/gradProject/main.go
+
+cf uninstall-plugin apmPlugin
+
+cf install-plugin main
