@@ -1,11 +1,11 @@
 package org.elsys.rest;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+// import java.sql.Connection;
+// import java.sql.DriverManager;
+// import java.sql.PreparedStatement;
+// import java.sql.ResultSet;
+// import java.sql.SQLException;
+// import java.sql.Statement;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.ws.rs.GET;
@@ -18,7 +18,7 @@ public class RestServiceTwo {
 	
 	private static AtomicLong counter = new AtomicLong(0);
 	
-	private Connection connect = null;
+	/*private Connection connect = null;
     private Statement statement = null;
     private PreparedStatement preparedStatement = null;
     private ResultSet resultSet = null;
@@ -29,12 +29,12 @@ public class RestServiceTwo {
 		    		+ "(Message) VALUES (?);");
         preparedStatement.setString(1, "Called " + counter.getAndIncrement() + " times");
         preparedStatement.executeUpdate();
-    }
+    }*/
     
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getResponse() throws SQLException {
-		StringBuilder message = new StringBuilder();
+	public String getResponse() {
+		/*StringBuilder message = new StringBuilder();
 		try {
 			// This will load the MySQL driver, each DB has its own driver
             Class.forName("com.mysql.jdbc.Driver");
@@ -67,7 +67,7 @@ public class RestServiceTwo {
                 connect.close();
             }
 		}
-		
-		return message.toString();
+		*/
+		return String.format("Called %d times", counter.getAndIncrement());
 	}
 }

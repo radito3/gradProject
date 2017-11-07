@@ -1,0 +1,3 @@
+when calling https://staticapp-exstipulate-billhead.cfapps.io/sample.txt 
+this text is shown, the file is not downloaded
+a file must be executable? to download it
