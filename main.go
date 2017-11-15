@@ -46,14 +46,26 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Println("Service One Response: ", resp)
 
 		case args[1] == "list-apps":
-			list, err := cliConnection.GetApps()
+			/*list, err := cliConnection.GetApps()
 			if err != nil {
 				fmt.Println(err)
 			} else {
 				for i := 0; i < len(list); i++ {
 					fmt.Println(list[i].Name)
 				}
+			}*/
+			app, err := cliConnection.GetApp("staticApp")
+			if err != nil {
+				fmt.Println(err)
+				return
 			}
+			var uri = []string{"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/list/"}
+			resp, err := getResponse(strings.Join(uri, ""))
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Println("Available apps: ", resp)
 
 		case args[1] == "install":
 			//check if such an app exists
