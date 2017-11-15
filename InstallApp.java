@@ -1,4 +1,4 @@
-package org.elsys.apm;
+package org.elsys.<something>;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
