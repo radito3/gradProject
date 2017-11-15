@@ -1,7 +1,9 @@
 {
     "default_files": [
-        "file": "index.html",
-        "file": "Staticfile"
+        "files": [
+            "index.html",
+            "Staticfile"
+        ]
     ],
     "apps": [
         "TestApp": {
