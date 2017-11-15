@@ -1,13 +1,15 @@
 {
-    "default_files": [
+    "TestApp": {
         "files": [
-            "index.html",
-            "Staticfile"
-        ]
-    ],
-    "apps": [
-        "TestApp": {
-            "file": "RestClientTwo.war"
-        }
-    ]
+            "RestClientOne.war",
+            "RestClientTwo.war"
+        ],
+        "data": "test" 
+    },
+    "App1": {
+        
+    },
+    "App2": {
+
+    }
 }
