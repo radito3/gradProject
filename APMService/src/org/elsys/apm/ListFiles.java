@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.stream.Stream;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.GET;
@@ -63,7 +64,8 @@ public class ListFiles {
 
             JSONParser parser = new JSONParser();
             JSONObject obj = (JSONObject) parser.parse(json.toString());
-            obj.keySet().stream().forEach(key -> {
+            Stream<?> keySet = obj.keySet().stream();
+            keySet.forEach(key -> {
                 result.append(key);
                 result.append('\n');
             });
