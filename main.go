@@ -46,7 +46,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Println("Service One Response: ", resp)
 
 		case args[1] == "list-apps":
-			app, err := cliConnection.GetApp("staticApp")
+			app, err := cliConnection.GetApp("listApps")
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -57,7 +57,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 				fmt.Println(err)
 				return
 			}
-			fmt.Println("Available apps: ", resp)
+			fmt.Println(fmt.Sprintf("Available apps:\n%s", resp))
 
 		case args[1] == "install":
 			//check if such an app exists
@@ -83,7 +83,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType {
 			Major: 2,
 			Minor: 3,
-			Build: 1,
+			Build: 6,
 		},
 		MinCliVersion: plugin.VersionType {
 			Major: 6,

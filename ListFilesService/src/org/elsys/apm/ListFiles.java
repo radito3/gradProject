@@ -23,7 +23,7 @@ public class ListFiles {
 
     @GET
     @Produces("text/plain")
-    public static String getListFiles() {
+    public String getListFiles() {
         StringBuilder uri = new StringBuilder();
         uri.append("https://");
         StringBuilder json = new StringBuilder();
