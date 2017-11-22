@@ -14,34 +14,33 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-@Path("/")
+@Path("/List")
 public class ListFiles {
 
     @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String getResponse() {
+    @Produces("text/plain")
+    public static String getListFiles() {
         StringBuilder uri = new StringBuilder();
         uri.append("https://");
         StringBuilder json = new StringBuilder();
         StringBuilder result = new StringBuilder();
 
-		try {
+        try {
             uri.append(System.getenv("uri"));
             uri.append("/descriptor.json");
 
-			URL url = new URL(uri.toString());
-			HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-	 		
-	 		InputStream in = con.getInputStream();
+            URL url = new URL(uri.toString());
+            HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
-	 		// File tempFile = File.createTempFile("descr", "json", null);
+            InputStream in = con.getInputStream();
+
+            // File tempFile = File.createTempFile("descr", "json", null);
             // FileOutputStream fos = new FileOutputStream(tempFile);
-            
+
             // byte[] buffer = new byte[4096];
             // while(in.read(buffer) > 0) {
             //     fos.write(buffer);
@@ -54,8 +53,8 @@ public class ListFiles {
             // tempFile.deleteOnExit();
 
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            
-            String line = null;
+
+            String line;
 
             while ((line = br.readLine()) != null) {
                 json.append(line);
@@ -70,13 +69,13 @@ public class ListFiles {
                 result.append('\n');
             });
 
-	 		in.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         } catch (ParseException e) {
-			e.printStackTrace();
-		}
-        
+            e.printStackTrace();
+        }
+
         return result.toString();
     }
 
