@@ -46,20 +46,12 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Println("Service One Response: ", resp)
 
 		case args[1] == "list-apps":
-			/*list, err := cliConnection.GetApps()
-			if err != nil {
-				fmt.Println(err)
-			} else {
-				for i := 0; i < len(list); i++ {
-					fmt.Println(list[i].Name)
-				}
-			}*/
 			app, err := cliConnection.GetApp("staticApp")
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
-			var uri = []string{"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/list/"}
+			var uri = []string{"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/list/List"}
 			resp, err := getResponse(strings.Join(uri, ""))
 			if err != nil {
 				fmt.Println(err)
@@ -91,7 +83,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType {
 			Major: 2,
 			Minor: 3,
-			Build: 0,
+			Build: 1,
 		},
 		MinCliVersion: plugin.VersionType {
 			Major: 6,
