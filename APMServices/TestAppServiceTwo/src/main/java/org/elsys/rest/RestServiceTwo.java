@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 @Path("/Test")
 public class RestServiceTwo {
@@ -31,7 +32,7 @@ public class RestServiceTwo {
     }*/
 
     @GET
-    @Produces("text/plain")
+    @Produces(MediaType.TEXT_PLAIN)
     public String getResponse() {
 		/*StringBuilder message = new StringBuilder();
 		try {
