@@ -1,13 +1,16 @@
 {
     "TestApp": {
         "files": [
-            "RestClientOne.war",
-            "RestClientTwo.war"
+            "TestAppServiceOne.war",
+            "TestAppServiceTwo.war"
         ],
-        "data": "test" 
+        "version": "1.0.0" 
     },
-    "App1": {
-        
+    "TodoList": {
+        "files": [
+            "TodoList.war"
+        ],
+        "version": "1.0.0"
     },
     "App2": {
 
