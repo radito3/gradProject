@@ -51,16 +51,43 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 				fmt.Println(fmt.Sprintf("Available apps:\n%s", resp))
 
 			case args[1] == "install":
-				//check if such an app exists
-				fmt.Sprintln("Application %s not found", args[2])
+				if len(args) < 3 {
+					fmt.Println("Incorrect usage.\nCorrect usage: cf apm install <app_name>")
+					return
+				}
+				//error checking for existing app will be in java code
+				resp, err := getAppResponse(cliConnection, "installApp", fmt.Sprintf("/install/%s", args[2]))
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println(resp);
 
 			case args[1] == "update":
-				//check if such an app exists
-				fmt.Sprintln("Application %s not found", args[2])
+				if len(args) < 3 {
+					fmt.Println("Incorrect usage.\nCorrect usage: cf apm update <app_name>")
+					return
+				}
+				//error checking for existing app will be in java code
+				resp, err := getAppResponse(cliConnection, "updateApp", fmt.Sprintf("/update/%s", args[2]))
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println(resp);
 
 			case args[1] == "delete":
-				//check if such an app exists
-				fmt.Sprintln("Application %s not found", args[2])
+				if len(args) < 3 {
+					fmt.Println("Incorrect usage.\nCorrect usage: cf apm delete <app_name>")
+					return
+				}
+				//error checking for existing app will be in java code
+				resp, err := getAppResponse(cliConnection, "deleteApp", fmt.Sprintf("/delete/%s", args[2]))
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println(resp);
 
 			default:
 				fmt.Println("Incorrect command.\nCommands are install/update/delete <app_name>")
@@ -72,8 +99,8 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 	return plugin.PluginMetadata {
 		Name: "apmPlugin",
 		Version: plugin.VersionType {
-			Major: 2,
-			Minor: 5,
+			Major: 3,
+			Minor: 0,
 			Build: 0,
 		},
 		MinCliVersion: plugin.VersionType {
