@@ -11,6 +11,8 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -19,7 +21,7 @@ import org.json.simple.parser.ParseException;
 public class ListFiles {
 
     @GET
-    @Produces("text/plain")
+    @Produces(MediaType.TEXT_PLAIN)
     public String getListFiles() {
         StringBuilder uri = new StringBuilder();
         uri.append("https://");
