@@ -40,43 +40,32 @@ func getAppResponse(con plugin.CliConnection, appName string, uriEnd string) (st
 }
 
 func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
-	if args[0] != "apm" {
-		fmt.Println("Incorrect usage.\nCorrect usage: cf apm <command> [<app_name>]")
-		return
+	if args[0] == "apm" {
+		switch {
+			case args[1] == "list-apps":
+				resp, err := getAppResponse(cliConnection, "listApps", "/list/List")
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println(fmt.Sprintf("Available apps:\n%s", resp))
+
+			case args[1] == "install":
+				//check if such an app exists
+				fmt.Sprintln("Application %s not found", args[2])
+
+			case args[1] == "update":
+				//check if such an app exists
+				fmt.Sprintln("Application %s not found", args[2])
+
+			case args[1] == "delete":
+				//check if such an app exists
+				fmt.Sprintln("Application %s not found", args[2])
+
+			default:
+				fmt.Println("Incorrect command.\nCommands are install/update/delete <app_name>")
+		}
 	}
-	switch {
-		case args[1] == "test-app":
-			resp, err := getAppResponse(cliConnection, "restServiceOne", "/rest/Test")
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			fmt.Println("Service One Response: ", resp)
-
-		case args[1] == "list-apps":
-			resp, err := getAppResponse(cliConnection, "listApps", "/list/List")
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			fmt.Println(fmt.Sprintf("Available apps:\n%s", resp))
-
-		case args[1] == "install":
-			//check if such an app exists
-			fmt.Sprintln("Application %s not found", args[2])
-
-		case args[1] == "update":
-			//check if such an app exists
-			fmt.Sprintln("Application %s not found", args[2])
-
-		case args[1] == "delete":
-			//check if such an app exists
-			fmt.Sprintln("Application %s not found", args[2])
-
-		default:
-			fmt.Println("Incorrect command.\nCommands are install/update/delete <app_name>")
-	}
-	
 }
 
 func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
