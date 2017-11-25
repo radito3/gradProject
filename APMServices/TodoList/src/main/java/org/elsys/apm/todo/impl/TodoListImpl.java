@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class TodoListImpl implements TodoList {
 
@@ -44,10 +43,13 @@ public class TodoListImpl implements TodoList {
 
     @Override
     public TodoList join(TodoList other) {
-        return new TodoListImpl(other.getTasks().stream()
-                .filter(t -> !this.getTasks().contains(t))
-                .peek(t -> this.getTasks().add(t))
-                .collect(Collectors.toList()));
+        List<Task> list = this.getTasks();
+        other.getTasks().stream()
+                .filter(t -> !list.contains(t))
+                .forEach(t -> {
+                    list.add(t);
+                });
+        return new TodoListImpl(list);
     }
 
 }
