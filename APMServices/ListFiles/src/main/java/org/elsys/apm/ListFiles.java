@@ -44,10 +44,10 @@ public class ListFiles {
 
             JSONParser parser = new JSONParser();
             JSONObject obj = (JSONObject) parser.parse(json.toString());
+            
             Stream<?> keySet = obj.keySet().stream();
             keySet.forEach(key -> {
-                result.append(key);
-                result.append('\n');
+                result.append(key).append('\n');
             });
 
             in.close();
