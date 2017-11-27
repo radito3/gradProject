@@ -1,5 +1,7 @@
 package org.elsys.apm;
 
+import org.cloudfoundry.client.lib.CloudCredentials;
+import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -15,10 +17,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 
 @Path("/{appName}")
 public class InstallApp {
+
+    private static final String user = System.getenv("user");
+    private static final String password = System.getenv("pass");
+    private static final String target = "https://console.run.pivotal.io/organizations/c8e1b338-f" +
+            "531-456b-a47b-cd6718eede49/spaces/8d28ec72-72d3-4b5d-9d54-f05c30ecd828";
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -86,6 +94,10 @@ public class InstallApp {
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
             InputStream in = con.getInputStream();
+
+            CloudCredentials credentials = new CloudCredentials(user, password);
+            CloudFoundryClient client = new CloudFoundryClient(credentials, URI.create(target).toURL());
+            client.login();
 
         } catch (IOException e) {
             e.printStackTrace();
