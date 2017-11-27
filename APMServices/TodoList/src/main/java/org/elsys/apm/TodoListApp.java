@@ -32,18 +32,14 @@ public class TodoListApp {
         StringBuilder result = new StringBuilder();
         result.append("Todo List tasks:\n");
         stream.forEach(t -> {
-            result.append("Task: ");
-            result.append(t.getDescription());
-            result.append("\n\t");
-            result.append("Status: ");
-            result.append(t.getStatus());
-            result.append("\n\t");
-            result.append("Priority: ");
-            result.append(t.getPriority());
-            result.append("\n\t");
-            result.append("Tags: ");
-            result.append(t.getTags());
-            result.append("\n");
+            result.append("Task: ").append(t.getDescription())
+                .append("\n\t")
+                .append("Status: ").append(t.getStatus())
+                .append("\n\t")
+                .append("Priority: ").append(t.getPriority())
+                .append("\n\t")
+                .append("Tags: ").append(t.getTags())
+                .append("\n");
         });
         return result.toString();
     }
