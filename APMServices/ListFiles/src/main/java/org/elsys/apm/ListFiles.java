@@ -23,24 +23,20 @@ public class ListFiles {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String getListFiles() {
-        StringBuilder uri = new StringBuilder();
-        uri.append("https://");
+        StringBuilder uri = new StringBuilder("https://");
         StringBuilder json = new StringBuilder();
         StringBuilder result = new StringBuilder();
 
         try {
-            uri.append(System.getenv("uri"));
-            uri.append("/descriptor.json");
+            uri.append(System.getenv("uri")).append("/descriptor.json");
 
             URL url = new URL(uri.toString());
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
             InputStream in = con.getInputStream();
-
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
             String line;
-
             while ((line = br.readLine()) != null) {
                 json.append(line);
                 json.append("\n");
@@ -48,16 +44,14 @@ public class ListFiles {
 
             JSONParser parser = new JSONParser();
             JSONObject obj = (JSONObject) parser.parse(json.toString());
+            
             Stream<?> keySet = obj.keySet().stream();
             keySet.forEach(key -> {
-                result.append(key);
-                result.append('\n');
+                result.append(key).append('\n');
             });
 
             in.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
 
