@@ -92,8 +92,9 @@ public class InstallApp {
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
             InputStream in = con.getInputStream();
 
-            CloudCredentials credentials = new CloudCredentials(user, password);
-            CloudFoundryClient client = new CloudFoundryClient(credentials, new URL(target),
+            CloudFoundryClient client = new CloudFoundryClient(
+                    new CloudCredentials(user, password),
+                    new URL(target),
                     new CloudSpace(CloudEntity.Meta.defaultMeta(), "development",
                             new CloudOrganization(CloudEntity.Meta.defaultMeta(), "graduationProject")));
             client.login();
