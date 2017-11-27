@@ -20,20 +20,6 @@ import java.net.URL;
 @Path("/{appName}")
 public class InstallApp {
 
-    private class Exc extends Exception {
-
-        static final long serialVersionUID = 1L;
-        private String message;
-
-        public Exc (String msg) {
-            message = msg;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-    }
-
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String getInstallResult(@PathParam("appName") String appName) {
@@ -45,7 +31,7 @@ public class InstallApp {
             JSONObject json = getDescriptor(staticAppUri.append("/descriptor.json").toString());
             JSONObject app;
             if ((app = (JSONObject) json.get(appName)) == null) {
-                throw new Exc("App does not exist.");
+                throw new ClassNotFoundException("App does not exist.");
             }
 
             JSONArray files = (JSONArray) app.get("files");
@@ -63,7 +49,7 @@ public class InstallApp {
 
         } catch (IOException | ParseException e) {
             e.printStackTrace();
-        } catch (Exc e) {
+        } catch (ClassNotFoundException e) {
             result.append(e.getMessage());
         }
 
