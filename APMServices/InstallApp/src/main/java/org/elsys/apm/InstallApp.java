@@ -52,17 +52,13 @@ public class InstallApp {
             files.stream().forEach(file -> {
                 if (staticAppUri.indexOf(".") > 0) {
                     staticAppUri.replace(staticAppUri.lastIndexOf("/"),
-                            staticAppUri.length() - 1,
+                            staticAppUri.length(),
                             file.toString());
                 } else {
                     staticAppUri.append('/').append(file.toString());
                 }
 
-                try {
-                    installApp(staticAppUri.toString());
-                } catch (IOException | ParseException e) {
-                    e.printStackTrace();
-                }
+                result.append(installApp(staticAppUri.toString()));
             });
 
         } catch (IOException | ParseException e) {
@@ -97,12 +93,20 @@ public class InstallApp {
         return obj;
     }
 
-    private void installApp(String uri) throws IOException, ParseException {
-        URL url = new URL(uri);
-        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+    private String installApp(String uri) {
 
-        InputStream in = con.getInputStream();
-        //...
+        try {
+            URL url = new URL(uri);
+            HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+
+            InputStream in = con.getInputStream();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "Error installing app.";
+        }
+
+        return "";
     }
 
 }
