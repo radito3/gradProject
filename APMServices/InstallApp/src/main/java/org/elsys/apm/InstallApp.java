@@ -41,7 +41,7 @@ public class InstallApp {
             JSONObject json = getDescriptor(staticAppUri.append("/descriptor.json").toString());
             JSONObject app;
             if ((app = (JSONObject) json.get(appName)) == null) {
-                throw new ClassNotFoundException("App does not exist.");
+                throw new ClassNotFoundException("App " + appName + " does not exist.");
             }
 
             JSONArray files = (JSONArray) app.get("files");
