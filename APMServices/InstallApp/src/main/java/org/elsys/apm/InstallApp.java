@@ -2,6 +2,7 @@ package org.elsys.apm;
 
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
+import org.cloudfoundry.client.lib.domain.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -17,16 +18,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
 
 @Path("/{appName}")
 public class InstallApp {
 
     private static final String user = System.getenv("user");
     private static final String password = System.getenv("pass");
-    private static final String target = "https://console.run.pivotal.io/organizations/c8e1b338-f" +
-            "531-456b-a47b-cd6718eede49/spaces/8d28ec72-72d3-4b5d-9d54-f05c30ecd828";
+    private static final String target = "https://api.run.pivotal.io";
+    private static final String buildpackUrl = "https://github.com/cloudfoundry/java-buildpack.git";
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -43,16 +45,17 @@ public class InstallApp {
             }
 
             JSONArray files = (JSONArray) app.get("files");
+            //need to test file name appending!
             files.stream().forEach(file -> {
-                if (staticAppUri.indexOf(".") > 0) {
+                if (staticAppUri.indexOf(".", staticAppUri.indexOf(".io/") + 1) > 0) {
                     staticAppUri.replace(staticAppUri.lastIndexOf("/"),
                             staticAppUri.length(),
-                            file.toString());
+                            String.valueOf(file));
                 } else {
-                    staticAppUri.append('/').append(file.toString());
+                    staticAppUri.append('/').append(String.valueOf(file));
                 }
 
-                result.append(installApp(staticAppUri.toString()));
+                result.append(installApp(staticAppUri.toString(), appName));
             });
 
         } catch (IOException | ParseException e) {
@@ -61,50 +64,60 @@ public class InstallApp {
             result.append(e.getMessage());
         }
 
-        return result.append(result.length() == 0 ? "App installed successfully." : "").toString();
+        return result.toString();
     }
 
     private JSONObject getDescriptor(String uri) throws IOException, ParseException {
         StringBuilder json = new StringBuilder();
-
         URL url = new URL(uri);
         HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-
         InputStream in = con.getInputStream();
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
         String line;
         while ((line = br.readLine()) != null) {
-            json.append(line);
-            json.append("\n");
+            json.append(line).append('\n');
         }
 
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(json.toString());
 
         in.close();
-
         return obj;
     }
 
-    private String installApp(String uri) {
-
+    private String installApp(String uri, String appName) {
         try {
             URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-
             InputStream in = con.getInputStream();
 
             CloudCredentials credentials = new CloudCredentials(user, password);
-            CloudFoundryClient client = new CloudFoundryClient(credentials, URI.create(target).toURL());
+            CloudFoundryClient client = new CloudFoundryClient(credentials, new URL(target),
+                    new CloudSpace(CloudEntity.Meta.defaultMeta(), "development",
+                            new CloudOrganization(CloudEntity.Meta.defaultMeta(), "graduationProject")));
             client.login();
 
+            client.createApplication(appName,
+                    new Staging("--no-manifest", buildpackUrl),
+                    1000,  //disk space
+                    1000,  //memory
+                    Collections.singletonList("https://" + appName.toLowerCase() + ".cfapps.io"),
+                    null);  //service names
+            CloudApplication app = client.getApplication(appName);
+            HashMap<Object, Object> ver = new HashMap<>();
+            ver.put("version", "1.0.0");
+            app.setEnv(ver);
+            
+            client.uploadApplication(appName, uri.substring(uri.lastIndexOf("/")), in);
+
+            client.logout();
+            in.close();
         } catch (IOException e) {
-            e.printStackTrace();
             return "Error installing app.";
         }
 
-        return "";
+        return "App installed successfully.";
     }
 
 }
