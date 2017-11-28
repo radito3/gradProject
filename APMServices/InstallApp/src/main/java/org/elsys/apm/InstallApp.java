@@ -45,16 +45,10 @@ public class InstallApp {
             }
 
             JSONArray files = (JSONArray) app.get("files");
-            //need to test file name appending!
             files.stream().forEach(file -> {
-                if (staticAppUri.indexOf(".", staticAppUri.indexOf(".io/") + 1) > 0) {
-                    staticAppUri.replace(staticAppUri.lastIndexOf("/"),
-                            staticAppUri.length(),
-                            String.valueOf(file));
-                } else {
-                    staticAppUri.append('/').append(String.valueOf(file));
-                }
-
+                staticAppUri.replace(staticAppUri.lastIndexOf("/") + 1,
+                        staticAppUri.length(),
+                        String.valueOf(file));
                 result.append(installApp(staticAppUri.toString(), appName));
             });
 

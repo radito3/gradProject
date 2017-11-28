@@ -55,7 +55,6 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 					fmt.Println("Incorrect usage.\nCorrect usage: cf apm install <app_name>")
 					return
 				}
-				//error checking for existing app will be in java code
 				resp, err := getAppResponse(cliConnection, "installApp", fmt.Sprintf("/install/%s", args[2]))
 				if err != nil {
 					fmt.Println(err)
@@ -68,7 +67,6 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 					fmt.Println("Incorrect usage.\nCorrect usage: cf apm update <app_name>")
 					return
 				}
-				//error checking for existing app will be in java code
 				resp, err := getAppResponse(cliConnection, "updateApp", fmt.Sprintf("/update/%s", args[2]))
 				if err != nil {
 					fmt.Println(err)
@@ -81,7 +79,6 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 					fmt.Println("Incorrect usage.\nCorrect usage: cf apm delete <app_name>")
 					return
 				}
-				//error checking for existing app will be in java code
 				resp, err := getAppResponse(cliConnection, "deleteApp", fmt.Sprintf("/delete/%s", args[2]))
 				if err != nil {
 					fmt.Println(err)
