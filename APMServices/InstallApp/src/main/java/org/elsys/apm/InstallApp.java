@@ -90,7 +90,7 @@ public class InstallApp {
                     new CloudCredentials(user, password),
                     new URL(target),
                     new CloudSpace(CloudEntity.Meta.defaultMeta(), "development",
-                            new CloudOrganization(CloudEntity.Meta.defaultMeta(), "graduationProject")));
+                        new CloudOrganization(CloudEntity.Meta.defaultMeta(), "graduationProject.org")));
             client.login();
 
             client.createApplication(appName,
