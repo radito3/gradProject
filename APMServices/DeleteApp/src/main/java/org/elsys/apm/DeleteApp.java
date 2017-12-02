@@ -13,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 @Path("/{appName}")
 public class DeleteApp {
@@ -34,7 +35,10 @@ public class DeleteApp {
                             new CloudOrganization(CloudEntity.Meta.defaultMeta(), "graduationProject.org")));
             client.login();
 
-            CloudApplication app = client.getApplication(appName);
+//            List<CloudApplication> apps = client.getApplications();
+//            apps.forEach(e -> System.out.println(e.getName()));
+
+//            CloudApplication app = client.getApplication(appName);
             client.deleteApplication(appName);
             client.logout();
             result.append("App deleted.");

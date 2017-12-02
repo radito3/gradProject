@@ -1,14 +1,14 @@
 {
     "TestApp": {
         "files": [
-            "TestAppServiceOne.war",
-            "TestAppServiceTwo.war"
+            "TestAppServiceOne-1.0-SNAPSHOT.war",
+            "TestAppServiceTwo-1.0-SNAPSHOT.war"
         ],
         "version": "1.0.0" 
     },
     "TodoList": {
         "files": [
-            "TodoList.war"
+            "TodoList-1.0-SNAPSHOT.war"
         ],
         "version": "1.0.0"
     },

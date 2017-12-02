@@ -2,11 +2,13 @@ package org.elsys.apm;
 
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
+import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.http.HttpStatus;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.GET;
@@ -21,6 +23,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 
 @Path("/{appName}")
 public class InstallApp {
@@ -45,12 +48,14 @@ public class InstallApp {
             }
 
             JSONArray files = (JSONArray) app.get("files");
-            files.stream().forEach(file -> {
+            Iterator it = files.iterator();
+            while (it.hasNext()) {
+                String file = String.valueOf(it.next());
                 staticAppUri.replace(staticAppUri.lastIndexOf("/") + 1,
                         staticAppUri.length(),
-                        String.valueOf(file));
-                result.append(installApp(staticAppUri.toString(), appName));
-            });
+                        file);
+                result.append(installApp(staticAppUri.toString(), appName, file));
+            }
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -79,7 +84,7 @@ public class InstallApp {
         return obj;
     }
 
-    private String installApp(String uri, String appName) {
+    private String installApp(String uri, String appName, String fileName) {
         try {
             URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
@@ -98,17 +103,23 @@ public class InstallApp {
                     1000,  //memory
                     Collections.singletonList("https://" + appName.toLowerCase() + ".cfapps.io"),
                     null);  //service names
-            CloudApplication app = client.getApplication(appName);
-            HashMap<Object, Object> ver = new HashMap<>();
-            ver.put("version", "1.0.0");
-            app.setEnv(ver);
+//            CloudApplication app = client.getApplication(appName);
+//            HashMap<Object, Object> ver = new HashMap<>();
+//            ver.put("version", "1.0.0");
+//            app.setEnv(ver);
 
-            client.uploadApplication(appName, uri.substring(uri.lastIndexOf("/") + 1), in);
+            client.uploadApplication(appName, fileName, in);
 
             client.logout();
             in.close();
         } catch (IOException e) {
             return "Error installing app.";
+        } catch (CloudFoundryException e) {
+            if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                return "bad request in installApp method: " + e.getMessage();
+            } else {
+                return e.getMessage();
+            }
         }
 
         return "App installed successfully.";
