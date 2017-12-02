@@ -39,8 +39,8 @@ public class InstallApp {
 
         try {
             JSONObject json = getDescriptor(staticAppUri.append("/descriptor.json").toString());
-            JSONObject app;
-            if ((app = (JSONObject) json.get(appName)) == null) {
+            JSONObject app = (JSONObject) json.get(appName);
+            if (app == null) {
                 throw new ClassNotFoundException("App " + appName + " not found");
             }
 
@@ -51,7 +51,6 @@ public class InstallApp {
                         String.valueOf(file));
                 result.append(installApp(staticAppUri.toString(), appName));
             });
-
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -90,7 +89,7 @@ public class InstallApp {
                     new CloudCredentials(user, password),
                     new URL(target),
                     new CloudSpace(CloudEntity.Meta.defaultMeta(), "development",
-                        new CloudOrganization(CloudEntity.Meta.defaultMeta(), "graduationProject.org")));
+                            new CloudOrganization(CloudEntity.Meta.defaultMeta(), "graduationProject.org")));
             client.login();
 
             client.createApplication(appName,
@@ -103,7 +102,7 @@ public class InstallApp {
             HashMap<Object, Object> ver = new HashMap<>();
             ver.put("version", "1.0.0");
             app.setEnv(ver);
-            
+
             client.uploadApplication(appName, uri.substring(uri.lastIndexOf("/") + 1), in);
 
             client.logout();
