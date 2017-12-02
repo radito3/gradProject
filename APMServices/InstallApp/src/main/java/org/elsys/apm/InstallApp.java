@@ -104,7 +104,7 @@ public class InstallApp {
             ver.put("version", "1.0.0");
             app.setEnv(ver);
             
-            client.uploadApplication(appName, uri.substring(uri.lastIndexOf("/")), in);
+            client.uploadApplication(appName, uri.substring(uri.lastIndexOf("/") + 1), in);
 
             client.logout();
             in.close();
