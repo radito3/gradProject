@@ -2,10 +2,9 @@ package org.elsys.apm;
 
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.cloudfoundry.client.lib.domain.CloudEntity;
-import org.cloudfoundry.client.lib.domain.CloudOrganization;
-import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.lib.domain.*;
+import org.springframework.http.HttpStatus;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -14,7 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 
 @Path("/{appName}")
 public class DeleteApp {
@@ -36,24 +34,18 @@ public class DeleteApp {
                             new CloudOrganization(CloudEntity.Meta.defaultMeta(), "graduationProject.org")));
             client.login();
 
-            List<CloudApplication> apps = client.getApplications();
-            CloudApplication check = null;
-            for (CloudApplication app : apps) {
-                if (app.getName().equals(appName)) {
-                    check = app;
-                }
-            }
-            if (check == null) {
-                throw new ClassNotFoundException("App " + appName + " does not exist.");
-            } else {
-                client.deleteApplication(appName);
-                client.logout();
-                result.append("App deleted.");
-            }
+            CloudApplication app = client.getApplication(appName);
+            client.deleteApplication(appName);
+            client.logout();
+            result.append("App deleted.");
         } catch (MalformedURLException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            result.append(e.getMessage());
+        } catch (CloudFoundryException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                result.append(String.format("App %s not found", appName));
+            } else {
+                result.append(e.getMessage());
+            }
         }
 
         return result.toString();
