@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Path("/{org}/{space}/install/{appName}")
+@Path("/{org}/{space}/update/{appName}")
 public class UpdateApp {
 
     @PathParam("org")
