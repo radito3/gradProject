@@ -11,39 +11,47 @@ import (
 
 type ApmPlugin struct {}
 
-func getHttpResponse(uri string) (string, error) {
-	resp, err := http.Get(uri)
+func httpResponse(method string, uri string) (string, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest(method, uri, nil)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("Sevice error on Get: %s", err))
+		return "", errors.New(fmt.Sprintf("%s", err))
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("%s", err))
 	}
 	defer resp.Body.Close()
 
-	bs, readErr := ioutil.ReadAll(resp.Body)
-	if readErr != nil {
-		return "", errors.New(fmt.Sprintf("Sevice error on Read: %s", readErr))
+	bs, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("Sevice error on Read: %s", err))
 	}
 	return string(bs), nil
 }
 
-func getAppResponse(con plugin.CliConnection, appName string, uriEnd string) (string, error) {
-	app, err := con.GetApp(appName)
-	if err != nil {
-		return "", errors.New(fmt.Sprintf("Error getting app: %s", err))
-	}
-
-	var uri = []string{"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, uriEnd}
-	resp, err := getHttpResponse(strings.Join(uri, ""))
-	if err != nil {
-		return "", errors.New(fmt.Sprintf("%s", err))
-	}
-	return resp, nil
-}
-
 func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	if args[0] == "apm" {
+		app, err := cliConnection.GetApp("apmServices")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		org, err := cliConnection.GetCurrentOrg()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		space, err := cliConnection.GetCurrentSpace()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		//may add login and logout for incorporation with the Singleton CloudControllerClient client
 		switch {
 			case args[1] == "list-apps":
-				resp, err := getAppResponse(cliConnection, "listApps", "/list/List")
+				var uri = []string {"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/list"}
+				resp, err := httpResponse("GET", strings.Join(uri, ""))
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -55,7 +63,8 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 					fmt.Println("Incorrect usage.\nCorrect usage: cf apm install <app_name>")
 					return
 				}
-				resp, err := getAppResponse(cliConnection, "installApp", fmt.Sprintf("/install/%s", args[2]))
+				var uri = []string {"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, fmt.Sprintf("/%s/%s/install/%s", org.Name, space.Name, args[2])}
+				resp, err := httpResponse("POST", strings.Join(uri, ""))
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -67,7 +76,8 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 					fmt.Println("Incorrect usage.\nCorrect usage: cf apm update <app_name>")
 					return
 				}
-				resp, err := getAppResponse(cliConnection, "updateApp", fmt.Sprintf("/update/%s", args[2]))
+				var uri = []string {"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, fmt.Sprintf("/%s/%s/update/%s", org.Name, space.Name, args[2])}
+				resp, err := httpResponse("PUT", strings.Join(uri, ""))
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -79,7 +89,8 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 					fmt.Println("Incorrect usage.\nCorrect usage: cf apm delete <app_name>")
 					return
 				}
-				resp, err := getAppResponse(cliConnection, "deleteApp", fmt.Sprintf("/delete/%s", args[2]))
+				var uri = []string {"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, fmt.Sprintf("/%s/%s/delete/%s", org.Name, space.Name, args[2])}
+				resp, err := httpResponse("DELETE", strings.Join(uri, ""))
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -96,7 +107,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 	return plugin.PluginMetadata {
 		Name: "apmPlugin",
 		Version: plugin.VersionType {
-			Major: 3,
+			Major: 4,
 			Minor: 0,
 			Build: 0,
 		},
