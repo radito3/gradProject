@@ -10,6 +10,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import static org.elsys.apm.CloudControllerClientProvider.getInstance;
+
 @Path("/{org}/{space}/delete/{appName}")
 public class DeleteApp {
 
@@ -19,7 +21,7 @@ public class DeleteApp {
     @PathParam("space")
     private String spaceName;
 
-    private CloudControllerClient client = new CloudControllerClientProvider(orgName, spaceName).getClient();
+    private CloudControllerClient client = getInstance(orgName, spaceName).getClient();
 
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)

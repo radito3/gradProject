@@ -19,6 +19,8 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Iterator;
 
+import static org.elsys.apm.CloudControllerClientProvider.getInstance;
+
 @Path("/{org}/{space}/install/{appName}")
 public class InstallApp {
 
@@ -28,7 +30,7 @@ public class InstallApp {
     @PathParam("space")
     private String spaceName;
 
-    private CloudControllerClient client = new CloudControllerClientProvider(orgName, spaceName).getClient();
+    private CloudControllerClient client = getInstance(orgName, spaceName).getClient();
     private static final String buildpackUrl = "https://github.com/cloudfoundry/java-buildpack.git";
 
     @POST

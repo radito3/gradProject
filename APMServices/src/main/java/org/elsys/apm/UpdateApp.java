@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.elsys.apm.CloudControllerClientProvider.getInstance;
+
 @Path("/{org}/{space}/update/{appName}")
 public class UpdateApp {
 
@@ -24,7 +26,7 @@ public class UpdateApp {
     @PathParam("space")
     private String spaceName;
 
-    private CloudControllerClient client = new CloudControllerClientProvider(orgName, spaceName).getClient();
+    private CloudControllerClient client = getInstance(orgName, spaceName).getClient();
     private static final String buildpackUrl = "https://github.com/cloudfoundry/java-buildpack.git";
 
     @PUT

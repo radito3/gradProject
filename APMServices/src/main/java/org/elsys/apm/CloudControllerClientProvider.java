@@ -15,7 +15,9 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-class CloudControllerClientProvider {
+final class CloudControllerClientProvider {
+
+    private static volatile CloudControllerClientProvider instance;
 
     private static final String staticAppUrl = System.getenv("staticAppUrl");
     private static final String user = System.getenv("user");
@@ -23,10 +25,21 @@ class CloudControllerClientProvider {
     private static final String target = "https://api.run.pivotal.io";
     private CloudControllerClient client;
 
-    CloudControllerClientProvider(String org, String space) {
+    private CloudControllerClientProvider(String org, String space) {
         CloudControllerClientFactory cl = new CloudControllerClientFactory(null, true);
         client = cl.newCloudController(getTargetUrl(), new CloudCredentials(user, pass), org, space);
         client.login();
+    }
+
+    static CloudControllerClientProvider getInstance(String org, String space) {
+        if (instance == null) {
+            synchronized (CloudControllerClientProvider.class) {
+                if (instance == null) {
+                    instance = new CloudControllerClientProvider(org, space);
+                }
+            }
+        }
+        return instance;
     }
 
     static String getStaticAppUrl() {
