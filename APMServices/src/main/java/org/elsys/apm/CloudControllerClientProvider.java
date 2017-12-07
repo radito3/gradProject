@@ -6,6 +6,7 @@ import org.cloudfoundry.client.lib.rest.CloudControllerClientFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -17,29 +18,17 @@ import java.net.URL;
 
 final class CloudControllerClientProvider {
 
-    private static volatile CloudControllerClientProvider instance;
-
     private static final String staticAppUrl = System.getenv("staticAppUrl");
-    private static final String user = System.getenv("user");
-    private static final String pass = System.getenv("pass");
+//    private static final String user = System.getenv("user");
+//    private static final String pass = System.getenv("pass");
     private static final String target = "https://api.run.pivotal.io";
     private CloudControllerClient client;
 
-    private CloudControllerClientProvider(String org, String space) {
+    CloudControllerClientProvider(String org, String space, String token) {
         CloudControllerClientFactory cl = new CloudControllerClientFactory(null, true);
-        client = cl.newCloudController(getTargetUrl(), new CloudCredentials(user, pass), org, space);
+        client = cl.newCloudController(getTargetUrl(),
+                new CloudCredentials(new DefaultOAuth2AccessToken(token)), org, space);
         client.login();
-    }
-
-    static CloudControllerClientProvider getInstance(String org, String space) {
-        if (instance == null) {
-            synchronized (CloudControllerClientProvider.class) {
-                if (instance == null) {
-                    instance = new CloudControllerClientProvider(org, space);
-                }
-            }
-        }
-        return instance;
     }
 
     static String getStaticAppUrl() {
