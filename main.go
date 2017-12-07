@@ -11,12 +11,13 @@ import (
 
 type ApmPlugin struct {}
 
-func httpResponse(method string, uri string) (string, error) {
+func httpResponse(method string, uri string, token string) (string, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(method, uri, nil)
 	if err != nil {
 		return "", errors.New(fmt.Sprintf("%s", err))
 	}
+	req.Header.Set("access-token", token)
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", errors.New(fmt.Sprintf("%s", err))
@@ -47,11 +48,15 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Println(err)
 			return
 		}
-		//may add login and logout for incorporation with the Singleton CloudControllerClient client
+		token, err := cliConnection.AccessToken()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		switch {
 			case args[1] == "list-apps":
 				var uri = []string {"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/list"}
-				resp, err := httpResponse("GET", strings.Join(uri, ""))
+				resp, err := httpResponse("GET", strings.Join(uri, ""), token)
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -64,7 +69,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 					return
 				}
 				var uri = []string {"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, fmt.Sprintf("/%s/%s/install/%s", org.Name, space.Name, args[2])}
-				resp, err := httpResponse("POST", strings.Join(uri, ""))
+				resp, err := httpResponse("POST", strings.Join(uri, ""), token)
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -77,7 +82,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 					return
 				}
 				var uri = []string {"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, fmt.Sprintf("/%s/%s/update/%s", org.Name, space.Name, args[2])}
-				resp, err := httpResponse("PUT", strings.Join(uri, ""))
+				resp, err := httpResponse("PUT", strings.Join(uri, ""), token)
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -90,7 +95,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 					return
 				}
 				var uri = []string {"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, fmt.Sprintf("/%s/%s/delete/%s", org.Name, space.Name, args[2])}
-				resp, err := httpResponse("DELETE", strings.Join(uri, ""))
+				resp, err := httpResponse("DELETE", strings.Join(uri, ""), token)
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -108,7 +113,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Name: "apmPlugin",
 		Version: plugin.VersionType {
 			Major: 4,
-			Minor: 0,
+			Minor: 1,
 			Build: 0,
 		},
 		MinCliVersion: plugin.VersionType {
