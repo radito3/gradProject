@@ -19,15 +19,16 @@ import java.net.URL;
 final class CloudControllerClientProvider {
 
     private static final String staticAppUrl = System.getenv("staticAppUrl");
-//    private static final String user = System.getenv("user");
-//    private static final String pass = System.getenv("pass");
     private static final String target = "https://api.run.pivotal.io";
     private CloudControllerClient client;
 
     CloudControllerClientProvider(String org, String space, String token) {
         CloudControllerClientFactory cl = new CloudControllerClientFactory(null, true);
+
         client = cl.newCloudController(getTargetUrl(),
-                new CloudCredentials(new DefaultOAuth2AccessToken(token)), org, space);
+                new CloudCredentials(new DefaultOAuth2AccessToken(token.split(" ")[1]), false),
+                org, space);
+
         client.login();
     }
 
