@@ -11,7 +11,8 @@ public class Application extends javax.ws.rs.core.Application {
     @Override
     public Set<Class<?>> getClasses() {
         return Arrays.stream(new Class<?>[]
-                {ListApps.class, DeleteApp.class, InstallApp.class, UpdateApp.class})
+                {ListApps.class, CloudControllerClientProvider.class, Buildpacks.class, InstallApp.class,
+                DeleteApp.class, UpdateApp.class, ThreadHolder.class})
                 .collect(Collectors.toSet());
     }
 }
