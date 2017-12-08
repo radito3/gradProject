@@ -1,17 +1,23 @@
 package org.elsys.apm;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.lib.UploadStatusCallback;
+import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.rest.CloudControllerClient;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpStatus;
 
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.net.ssl.HttpsURLConnection;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,40 +30,69 @@ public class UpdateApp {
     @PathParam("space")
     private String spaceName;
 
-    private CloudControllerClient client = new CloudControllerClientProvider(orgName, spaceName, "").getClient();
-    private static final String buildpackUrl = "https://github.com/cloudfoundry/java-buildpack.git";
+    private CloudControllerClient client;
 
     @PUT
     @Produces(MediaType.TEXT_PLAIN)
-    public String getUpdateResult(@PathParam("appName") String appName) {
-        StringBuilder result = new StringBuilder();
+    public Response getUpdateResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
+        client = new CloudControllerClientProvider(orgName, spaceName, token).getClient();
+        StringBuilder staticAppUrl = new StringBuilder(CloudControllerClientProvider.getStaticAppUrl());
         try {
-            client.getApplication(appName);
+            CloudApplication app = client.getApplication(appName);
 
             JSONObject descr = CloudControllerClientProvider
                     .getDescriptor(CloudControllerClientProvider.getStaticAppUrl() + "/descriptor.json");
-            //check for newer version
-            String ver = String.valueOf(descr.get("version"));
-            Pattern pattern = Pattern.compile("^(\\d).(\\d).(\\d)$");
-            Matcher matcher = pattern.matcher(ver);
-            int Major = Integer.parseInt(matcher.group(1));
-            int Minor = Integer.parseInt(matcher.group(2));
-            int Build = Integer.parseInt(matcher.group(3));
 
-            //if update ->
-            result.append("App updated");
-            //if up-to-date ->
-            result.append("App already up-to-date");
+            String repoVer = String.valueOf(descr.get("version"));
+            String currentVer = app.getEnvAsMap().get("version");
+
+            Pattern pattern = Pattern.compile("^(\\d).(\\d).(\\d)$");
+            Matcher repoVerMatch = pattern.matcher(repoVer);
+            Matcher currentVerMatch = pattern.matcher(currentVer);
+
+            if (repoVerMatch.matches() && currentVerMatch.matches()) {
+                if (Integer.parseInt(currentVerMatch.group(1)) < Integer.parseInt(repoVerMatch.group(1))
+                        || Integer.parseInt(currentVerMatch.group(2)) < Integer.parseInt(repoVerMatch.group(2))) {
+
+                    JSONObject appJson = (JSONObject) descr.get(appName);
+                    JSONArray files = (JSONArray) appJson.get("files");
+                    for (Object file1 : files) {
+                        String file = String.valueOf(file1);
+                        staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1,
+                                staticAppUrl.length(),
+                                file);
+                        uploadApp(staticAppUrl.toString(), appName, file);
+                    }
+                } else {
+                    return Response.status(200).entity("App up-to-date").build();
+                }
+            }
         } catch (CloudFoundryException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                result.append(String.format("App %s not found", appName));
+                return Response.status(404).entity("App " + appName + " not found").build();
             } else {
-                result.append(e.getMessage());
+                return Response.status(Integer.parseInt(e.getStatusCode().toString())).entity(e.getMessage()).build();
             }
         } catch (ParseException | IOException e) {
             e.printStackTrace();
         }
-        client.logout();
-        return "UpdateApp Not Implemented";
+        return Response.status(202).entity("App updated").build();
+    }
+
+    private void uploadApp(String uri, String appName, String fileName) {
+        try {
+            URL url = new URL(uri);
+            HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+            InputStream in = con.getInputStream();
+
+            String nameToUpload = Objects.equals(appName.toLowerCase(), fileName.split("-")[0].toLowerCase()) ?
+                    appName : fileName.split("-")[0];
+
+            client.uploadApplication(nameToUpload, fileName, in, UploadStatusCallback.NONE);
+
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
