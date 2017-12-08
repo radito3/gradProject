@@ -2,24 +2,26 @@ package org.elsys.apm;
 
 /**
  * For future implementation of applications in languages other than Java
- *
- * @author Rangel Ivanov
  */
 enum Buildpacks {
 
     JAVA("https://github.com/cloudfoundry/java-buildpack.git"),
 
-    CPP(""),
+    RUBY("https://github.com/cloudfoundry/ruby-buildpack.git"),
 
-    RUBY(""),
+    PYTHON("https://github.com/cloudfoundry/python-buildpack.git"),
 
-    PYTHON(""),
+    NODEJS("https://github.com/cloudfoundry/nodejs-buildpack.git"),
 
-    C(""),
+    GO("https://github.com/cloudfoundry/go-buildpack"),
 
-    GO(""),
+    /**
+     * Hosted Web Core applications
+     * Windows applications
+     */
+    HWC("https://github.com/cloudfoundry/hwc-buildpack"),
 
-    CSHARP("");
+    PHP("https://github.com/cloudfoundry/php-buildpack.git");
 
     private final String url;
 
