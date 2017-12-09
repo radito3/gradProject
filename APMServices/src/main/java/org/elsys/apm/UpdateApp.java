@@ -3,7 +3,6 @@ package org.elsys.apm;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.UploadStatusCallback;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.cloudfoundry.client.lib.rest.CloudControllerClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -29,15 +28,17 @@ public class UpdateApp {
     @PathParam("space")
     private String spaceName;
 
-    private CloudControllerClient client;
+    private CloudControllerClientProvider client;
 
     @PUT
     @Produces(MediaType.TEXT_PLAIN)
     public Response getUpdateResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
-        client = new CloudControllerClientProvider(orgName, spaceName, token).getClient();
+        client = new CloudControllerClientProvider(orgName, spaceName, token);
+        client.login();
+
         StringBuilder staticAppUrl = new StringBuilder(CloudControllerClientProvider.getStaticAppUrl());
         try {
-            CloudApplication app = client.getApplication(appName);
+            CloudApplication app = client.getApp(appName);
 
             JSONObject descr = CloudControllerClientProvider
                     .getDescriptor(CloudControllerClientProvider.getStaticAppUrl() + "/descriptor.json");
@@ -55,13 +56,13 @@ public class UpdateApp {
 
                     JSONObject appJson = (JSONObject) descr.get(appName);
                     JSONArray files = (JSONArray) appJson.get("files");
+
                     for (Object file1 : files) {
                         String file = String.valueOf(file1);
-                        staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1,
-                                staticAppUrl.length(),
-                                file);
+                        staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), file);
                         uploadApp(staticAppUrl.toString(), appName, file);
                     }
+
                 } else {
                     return Response.status(200).entity("App up-to-date").build();
                 }
@@ -72,9 +73,13 @@ public class UpdateApp {
             } else {
                 return Response.status(Integer.parseInt(e.getStatusCode().toString())).entity(e.getMessage()).build();
             }
+
         } catch (ParseException | IOException e) {
             e.printStackTrace();
+        } finally {
+            client.logout();
         }
+
         return Response.status(202).entity("App updated").build();
     }
 
@@ -87,7 +92,7 @@ public class UpdateApp {
             String nameToUpload = Objects.equals(appName.toLowerCase(), fileName.split("-")[0].toLowerCase()) ?
                     appName : fileName.split("-")[0];
 
-            client.uploadApplication(nameToUpload, fileName, in, UploadStatusCallback.NONE);
+            client.uploadApp(nameToUpload, fileName, in, UploadStatusCallback.NONE);
 
             in.close();
         } catch (IOException e) {
