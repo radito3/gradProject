@@ -1,6 +1,10 @@
 package org.elsys.apm;
 
 import org.cloudfoundry.client.lib.CloudCredentials;
+import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.lib.UploadStatusCallback;
+import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.cloudfoundry.client.lib.domain.Staging;
 import org.cloudfoundry.client.lib.rest.CloudControllerClient;
 import org.cloudfoundry.client.lib.rest.CloudControllerClientFactory;
 import org.json.simple.JSONObject;
@@ -15,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 final class CloudControllerClientProvider {
 
@@ -28,16 +33,36 @@ final class CloudControllerClientProvider {
         client = cl.newCloudController(getTargetUrl(),
                 new CloudCredentials(new DefaultOAuth2AccessToken(token.split(" ")[1]), false),
                 org, space);
+    }
 
+    void login() {
         client.login();
+    }
+
+    void uploadApp(String appName, String fileName, InputStream inputStream,
+                   UploadStatusCallback callback) throws IOException {
+        client.uploadApplication(appName, fileName, inputStream, callback);
+    }
+
+    void createApp(String appName, Staging staging, Integer disk, Integer memory,
+                   List<String> uris) {
+        client.createApplication(appName, staging, disk, memory, uris, null);
+    }
+
+    void logout() {
+        client.logout();
+    }
+
+    CloudApplication getApp(String appName) throws CloudFoundryException {
+        return client.getApplication(appName);
+    }
+
+    void deleteApp(String appName) {
+        client.deleteApplication(appName);
     }
 
     static String getStaticAppUrl() {
         return staticAppUrl;
-    }
-
-    CloudControllerClient getClient() {
-        return client;
     }
 
     static JSONObject getDescriptor(String uri) throws IOException, ParseException {
