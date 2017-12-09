@@ -1,8 +1,8 @@
 package org.elsys.apm;
 
 import org.cloudfoundry.client.lib.UploadStatusCallback;
+import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.Staging;
-import org.cloudfoundry.client.lib.rest.CloudControllerClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -11,6 +11,7 @@ import org.modeshape.common.text.Inflector;
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -27,15 +28,16 @@ public class InstallApp {
     @PathParam("space")
     private String spaceName;
 
-    private CloudControllerClient client;
+    private CloudControllerClientProvider client;
 
     private static final String buildpackUrl = Buildpacks.JAVA.getUrl();
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public String getInstallResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
-        client = new CloudControllerClientProvider(orgName, spaceName, token).getClient();
-        StringBuilder result = new StringBuilder();
+    public Response getInstallResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
+        client = new CloudControllerClientProvider(orgName, spaceName, token);
+        client.login();
+
         StringBuilder staticAppUrl = new StringBuilder(CloudControllerClientProvider.getStaticAppUrl());
         try {
             JSONObject descr = CloudControllerClientProvider
@@ -46,23 +48,25 @@ public class InstallApp {
             }
 
             JSONArray files = (JSONArray) app.get("files");
+
             for (Object file1 : files) {
                 String file = String.valueOf(file1);
-                staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1,
-                        staticAppUrl.length(),
-                        file);
-                result.append(installApp(staticAppUrl.toString(), appName, file));
+                staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), file);
+                installApp(staticAppUrl.toString(), appName, file);
             }
+
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
-            result.append(e.getMessage());
+            return Response.status(404).entity(e.getMessage()).build();
+        } finally {
+            client.logout();
         }
-        client.logout();
-        return result.toString();
+
+        return Response.status(201).entity("App installed successfully").build();
     }
 
-    private String installApp(String uri, String appName, String fileName) {
+    private void installApp(String uri, String appName, String fileName) {
         try {
             URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
@@ -73,26 +77,19 @@ public class InstallApp {
 
             String name = Inflector.getInstance().lowerCamelCase(nameToUpload);
 
-            client.createApplication(name,
-                    new Staging(null, buildpackUrl),
-                    1000,  //disk space
-                    1000,  //memory
-                    Collections.singletonList("https://" + appName.toLowerCase() + ".cfapps.io"),
-                    null);  //service names
+            client.createApp(name, new Staging(null, buildpackUrl), 1000, 1000,
+                    Collections.singletonList("https://" + appName.toLowerCase() + ".cfapps.io"));
 
-            client.uploadApplication(name, fileName, in, UploadStatusCallback.NONE);
+            client.uploadApp(name, fileName, in, UploadStatusCallback.NONE);
 
-            //doesn't work
-//            CloudApplication app = client.getApplication(name);
-//            HashMap<Object, Object> ver = new HashMap<>();
-//            ver.put("appVersion", "1.0.0");
-//            app.setEnv(ver);
+            CloudApplication app = client.getApp(name);
+            HashMap<Object, Object> ver = new HashMap<>();
+            ver.put("appVersion", "1.0.0");
+            app.setEnv(ver);
 
             in.close();
         } catch (IOException e) {
-            return "Error installing app";
+            e.printStackTrace();
         }
-
-        return "App installed successfully\n";
     }
  }
