@@ -16,7 +16,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,8 +42,8 @@ public class UpdateApp {
             JSONObject descr = CloudControllerClientProvider
                     .getDescriptor(CloudControllerClientProvider.getStaticAppUrl() + "/descriptor.json");
 
-            String repoVer = String.valueOf(descr.get("version"));
-            String currentVer = app.getEnvAsMap().get("version");
+            String repoVer = String.valueOf(descr.get("appVersion"));
+            String currentVer = app.getEnvAsMap().get("appVersion");
 
             Pattern pattern = Pattern.compile("^(\\d).(\\d).(\\d)$");
             Matcher repoVerMatch = pattern.matcher(repoVer);
