@@ -1,7 +1,6 @@
 package org.elsys.apm;
 
 import org.cloudfoundry.client.lib.UploadStatusCallback;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.cloudfoundry.client.lib.rest.CloudControllerClient;
 import org.json.simple.JSONArray;
@@ -75,7 +74,7 @@ public class InstallApp {
             String name = Inflector.getInstance().lowerCamelCase(nameToUpload);
 
             client.createApplication(name,
-                    new Staging("--no-manifest", buildpackUrl),
+                    new Staging(null, buildpackUrl),
                     1000,  //disk space
                     1000,  //memory
                     Collections.singletonList("https://" + appName.toLowerCase() + ".cfapps.io"),
@@ -83,10 +82,11 @@ public class InstallApp {
 
             client.uploadApplication(name, fileName, in, UploadStatusCallback.NONE);
 
-            CloudApplication app = client.getApplication(name);
-            HashMap<Object, Object> ver = new HashMap<>();
-            ver.put("version", "1.0.0");
-            app.setEnv(ver);
+            //doesn't work
+//            CloudApplication app = client.getApplication(name);
+//            HashMap<Object, Object> ver = new HashMap<>();
+//            ver.put("appVersion", "1.0.0");
+//            app.setEnv(ver);
 
             in.close();
         } catch (IOException e) {
