@@ -1,11 +1,11 @@
 package org.elsys.apm;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.lib.rest.CloudControllerClient;
 import org.springframework.http.HttpStatus;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @Path("/{org}/{space}/delete/{appName}")
 public class DeleteApp {
@@ -18,21 +18,25 @@ public class DeleteApp {
 
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
-    public String getDeleteResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
-        CloudControllerClient client = new CloudControllerClientProvider(orgName, spaceName, token).getClient();
-        StringBuilder result = new StringBuilder();
+    public Response getDeleteResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
+        CloudControllerClientProvider client = new CloudControllerClientProvider(orgName, spaceName, token);
+        client.login();
+
         try {
-            client.getApplication(appName);
-            client.deleteApplication(appName);
-            result.append("App deleted");
+            client.getApp(appName);
+            client.deleteApp(appName);
+
         } catch (CloudFoundryException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                result.append(String.format("App %s not found", appName));
+                return Response.status(404).entity("App " + appName + " not found").build();
             } else {
-                result.append(e.getMessage());
+                return Response.status(Integer.parseInt(e.getStatusCode().toString())).entity(e.getMessage()).build();
             }
+
+        } finally {
+            client.logout();
         }
-        client.logout();
-        return result.toString();
+
+        return Response.status(200).entity("App deleted").build();
     }
 }
