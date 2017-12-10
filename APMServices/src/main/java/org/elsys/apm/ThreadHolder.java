@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 final class ThreadHolder {
 
     private static volatile ThreadHolder instance;
-
+    // that thread is lonely ;)
     private ExecutorService executor = Executors.newFixedThreadPool(1);
 
     private AtomicInteger count = new AtomicInteger();

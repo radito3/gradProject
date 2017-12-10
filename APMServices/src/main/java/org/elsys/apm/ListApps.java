@@ -1,14 +1,16 @@
 package org.elsys.apm;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
+import java.io.IOException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
+
+//list is not so descriptive. Consider fitting in the CF terminology e.g. using the term 'marketplace'
 @Path("/list")
 public class ListApps {
 
