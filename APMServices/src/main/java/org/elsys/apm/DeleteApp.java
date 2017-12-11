@@ -19,7 +19,7 @@ public class DeleteApp {
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     public Response getDeleteResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
-        CloudControllerClientProvider client = new CloudControllerClientProvider(orgName, spaceName, token);
+        CloudClient client = new CloudClient(orgName, spaceName, token);
         client.login();
 
         try {
@@ -32,7 +32,6 @@ public class DeleteApp {
             } else {
                 return Response.status(Integer.parseInt(e.getStatusCode().toString())).entity(e.getMessage()).build();
             }
-
         } finally {
             client.logout();
         }

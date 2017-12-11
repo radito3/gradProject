@@ -13,13 +13,13 @@ enum Buildpacks {
 
     NODEJS("https://github.com/cloudfoundry/nodejs-buildpack.git"),
 
-    GO("https://github.com/cloudfoundry/go-buildpack.git"),
+    GO("https://github.com/cloudfoundry/go-buildpack"),
 
     /**
      * Hosted Web Core applications
      * Windows applications
      */
-    HWC("https://github.com/cloudfoundry/hwc-buildpack.git"),
+    HWC("https://github.com/cloudfoundry/hwc-buildpack"),
 
     PHP("https://github.com/cloudfoundry/php-buildpack.git");
 

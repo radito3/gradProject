@@ -7,30 +7,25 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.cloudfoundry.client.lib.rest.CloudControllerClient;
 import org.cloudfoundry.client.lib.rest.CloudControllerClientFactory;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
-final class CloudControllerClientProvider {
+class CloudClient {
 
-    private static final String staticAppUrl = System.getenv("staticAppUrl");
-    private static final String target = "https://api.run.pivotal.io";
+    private static final String TARGET = System.getenv("targetUrl");
+
     private CloudControllerClient client;
 
-    CloudControllerClientProvider(String org, String space, String token) {
-        CloudControllerClientFactory cl = new CloudControllerClientFactory(null, true);
+    CloudClient(String org, String space, String token) {
+        CloudControllerClientFactory cloudFactory = new CloudControllerClientFactory(null, true);
 
-        client = cl.newCloudController(getTargetUrl(),
+        client = cloudFactory.newCloudController(getTargetUrl(),
                 new CloudCredentials(new DefaultOAuth2AccessToken(token.split(" ")[1]), false),
                 org, space);
     }
@@ -61,33 +56,13 @@ final class CloudControllerClientProvider {
         client.deleteApplication(appName);
     }
 
-    static String getStaticAppUrl() {
-        return staticAppUrl;
-    }
-
-    static JSONObject getDescriptor(String uri) throws IOException, ParseException {
-        StringBuilder json = new StringBuilder();
-        URL url = new URL(uri);
-        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-        InputStream in = con.getInputStream();
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-
-        String line;
-        while ((line = br.readLine()) != null) {
-            json.append(line).append('\n');
-        }
-
-        JSONParser parser = new JSONParser();
-        JSONObject obj = (JSONObject) parser.parse(json.toString());
-
-        in.close();
-        br.close();
-        return obj;
+    void updateAppEnv(String appName, Map<String, String> env) {
+        client.updateApplicationEnv(appName, env);
     }
 
     private URL getTargetUrl() {
         try {
-            return new URL(target);
+            return new URL(TARGET);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

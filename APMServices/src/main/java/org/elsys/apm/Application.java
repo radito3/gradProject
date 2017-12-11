@@ -1,18 +1,16 @@
 package org.elsys.apm;
 
+import jersey.repackaged.com.google.common.collect.Sets;
+
 import javax.ws.rs.ApplicationPath;
-import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @ApplicationPath("/")
 public class Application extends javax.ws.rs.core.Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return Arrays.stream(new Class<?>[]
-                {ListApps.class, CloudControllerClientProvider.class, Buildpacks.class, InstallApp.class,
-                DeleteApp.class, UpdateApp.class, ThreadHolder.class})
-                .collect(Collectors.toSet());
+        return Sets.newHashSet(ListApps.class, CloudClient.class, Buildpacks.class,
+                InstallApp.class, DeleteApp.class, UpdateApp.class, ThreadHolder.class, DescriptorWork.class);
     }
 }

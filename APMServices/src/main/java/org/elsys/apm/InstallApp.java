@@ -1,7 +1,7 @@
 package org.elsys.apm;
 
+import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.cloudfoundry.client.lib.UploadStatusCallback;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Objects;
 
 @Path("/{org}/{space}/install/{appName}")
@@ -28,20 +27,19 @@ public class InstallApp {
     @PathParam("space")
     private String spaceName;
 
-    private CloudControllerClientProvider client;
+    private CloudClient client;
 
     private static final String buildpackUrl = Buildpacks.JAVA.getUrl();
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     public Response getInstallResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
-        client = new CloudControllerClientProvider(orgName, spaceName, token);
+        client = new CloudClient(orgName, spaceName, token);
         client.login();
 
-        StringBuilder staticAppUrl = new StringBuilder(CloudControllerClientProvider.getStaticAppUrl());
+        StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.STATIC_APP_URL);
         try {
-            JSONObject descr = CloudControllerClientProvider
-                    .getDescriptor(staticAppUrl.append("/descriptor.json").toString());
+            JSONObject descr = DescriptorWork.getDescriptor(staticAppUrl.append("/descriptor.json").toString());
             JSONObject app = (JSONObject) descr.get(appName);
             if (app == null) {
                 throw new ClassNotFoundException("App " + appName + " not found");
@@ -81,10 +79,7 @@ public class InstallApp {
 
             client.uploadApp(name, fileName, in, UploadStatusCallback.NONE);
 
-            CloudApplication app = client.getApp(name);
-            HashMap<Object, Object> ver = new HashMap<>();
-            ver.put("appVersion", "1.0.0");
-            app.setEnv(ver);
+            client.updateAppEnv(appName, ImmutableMap.of("appVersion", "1.0.0"));
 
             in.close();
         } catch (IOException e) {
