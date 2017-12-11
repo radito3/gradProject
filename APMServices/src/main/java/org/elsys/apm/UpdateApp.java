@@ -45,22 +45,20 @@ public class UpdateApp {
             Matcher repoVerMatch = getMatchers(app, descr).get("repoVerMatch");
             Matcher currentVerMatch = getMatchers(app, descr).get("currentVerMatch");
 
-            if (!repoVerMatch.matches() || !currentVerMatch.matches()) {
-                return Response.status(500).entity("Regex doesn't match").build();
-            }
+            if (repoVerMatch.matches() && currentVerMatch.matches()) {
+                if (Integer.parseInt(currentVerMatch.group(1)) >= Integer.parseInt(repoVerMatch.group(1))
+                        || Integer.parseInt(currentVerMatch.group(2)) >= Integer.parseInt(repoVerMatch.group(2))) {
+                    return Response.status(200).entity("App up-to-date").build();
+                }
 
-            if (Integer.parseInt(currentVerMatch.group(1)) >= Integer.parseInt(repoVerMatch.group(1))
-                    || Integer.parseInt(currentVerMatch.group(2)) >= Integer.parseInt(repoVerMatch.group(2))) {
-                return Response.status(200).entity("App up-to-date").build();
-            }
+                JSONObject appJson = (JSONObject) descr.get(appName);
+                JSONArray files = (JSONArray) appJson.get("files");
 
-            JSONObject appJson = (JSONObject) descr.get(appName);
-            JSONArray files = (JSONArray) appJson.get("files");
-
-            for (Object file : files) {
-                String fileName = String.valueOf(file);
-                staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
-                uploadApp(staticAppUrl.toString(), appName, fileName);
+                for (Object file : files) {
+                    String fileName = String.valueOf(file);
+                    staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
+                    uploadApp(staticAppUrl.toString(), appName, fileName);
+                }
             }
 
         } catch (CloudFoundryException e) {
