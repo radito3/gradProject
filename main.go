@@ -55,7 +55,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 		}
 		switch {
 			case args[1] == "list-apps":
-				var uri = []string {"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/list"}
+				var uri = []string {"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/list_repo_apps"}
 				resp, err := httpResponse("GET", strings.Join(uri, ""), token)
 				if err != nil {
 					fmt.Println(err)
