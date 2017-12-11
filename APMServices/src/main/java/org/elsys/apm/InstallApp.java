@@ -48,11 +48,10 @@ public class InstallApp {
             }
 
             JSONArray files = (JSONArray) app.get("files");
-
-            for (Object file1 : files) {
-                String file = String.valueOf(file1);
-                staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), file);
-                installApp(staticAppUrl.toString(), appName, file);
+            for (Object file : files) {
+                String fileName = String.valueOf(file);
+                staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
+                installApp(staticAppUrl.toString(), appName, fileName);
             }
 
         } catch (IOException | ParseException e) {
