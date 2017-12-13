@@ -52,16 +52,20 @@ public class UpdateApp {
             Matcher currentVerMatch = getMatchers(app, appJson).get("currentVerMatch");
 
             if (repoVerMatch.matches() && currentVerMatch.matches()) {
+                int currentVerMajor = Integer.parseInt(currentVerMatch.group(1));
+                int currentVerMinor = Integer.parseInt(currentVerMatch.group(2));
+
+                int repoVerMajor = Integer.parseInt(repoVerMatch.group(1));
+                int repoVerMinor = Integer.parseInt(repoVerMatch.group(2));
                 //could make a recursive function checking the versions
-                if (Integer.parseInt(currentVerMatch.group(1)) < Integer.parseInt(repoVerMatch.group(1))
-                        || Integer.parseInt(currentVerMatch.group(2)) < Integer.parseInt(repoVerMatch.group(2))) {
+                if (currentVerMajor < repoVerMajor || currentVerMinor < repoVerMinor) {
 
                     JSONArray files = (JSONArray) appJson.get("files");
-                    StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.STATIC_APP_URL);
+                    StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.STATIC_APP_URL + "/text.txt");
                     for (Object file : files) {
                         String fileName = String.valueOf(file);
                         staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
-                        uploadApp(staticAppUrl.toString(), appName, fileName);
+                        uploadApp(staticAppUrl.toString(), appName, fileName, String.valueOf(appJson.get("appVersion")));
                     }
                 } else { //version comparison if
                     return Response.status(200).entity("App up-to-date").build();
@@ -85,7 +89,7 @@ public class UpdateApp {
         return Response.status(202).entity("App updated").build();
     }
 
-    private void uploadApp(String uri, String appName, String fileName) throws IOException {
+    private void uploadApp(String uri, String appName, String fileName, String appVer) throws IOException {
         InputStream in = null;
         try {
             URL url = new URL(uri);
@@ -96,6 +100,7 @@ public class UpdateApp {
                     appName : fileName.split("-")[0];
 
             client.uploadApp(nameToUpload, fileName, in, UploadStatusCallback.NONE);
+            client.updateAppEnv(nameToUpload, ImmutableMap.of("appVersion", appVer));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
