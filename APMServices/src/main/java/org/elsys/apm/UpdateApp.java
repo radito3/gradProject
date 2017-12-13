@@ -8,6 +8,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpStatus;
+import org.modeshape.common.text.Inflector;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.*;
@@ -38,12 +39,17 @@ public class UpdateApp {
         client = new CloudClient(orgName, spaceName, token);
         client.login();
 
-        StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.STATIC_APP_URL);
         try {
             CloudApplication app = client.getApp(appName);
-            JSONObject descr = DescriptorWork.getDescriptor(DescriptorWork.STATIC_APP_URL + "/descriptor.json");
-            Matcher repoVerMatch = getMatchers(app, descr).get("repoVerMatch");
-            Matcher currentVerMatch = getMatchers(app, descr).get("currentVerMatch");
+            JSONObject descr = DescriptorWork.getDescriptor(DescriptorWork.DESCRIPTOR_URL);
+
+            JSONObject appJson = (JSONObject) descr.get(Inflector.getInstance().upperCamelCase(appName));
+            if (appJson == null) {
+                throw new IllegalArgumentException("App " + appName + " no longer supported");
+            }
+
+            Matcher repoVerMatch = getMatchers(app, appJson).get("repoVerMatch");
+            Matcher currentVerMatch = getMatchers(app, appJson).get("currentVerMatch");
 
             if (repoVerMatch.matches() && currentVerMatch.matches()) {
                 if (Integer.parseInt(currentVerMatch.group(1)) >= Integer.parseInt(repoVerMatch.group(1))
@@ -51,9 +57,8 @@ public class UpdateApp {
                     return Response.status(200).entity("App up-to-date").build();
                 }
 
-                JSONObject appJson = (JSONObject) descr.get(appName);
                 JSONArray files = (JSONArray) appJson.get("files");
-
+                StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.STATIC_APP_URL);
                 for (Object file : files) {
                     String fileName = String.valueOf(file);
                     staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
@@ -69,6 +74,8 @@ public class UpdateApp {
             }
         } catch (ParseException | IOException e) {
             e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            return Response.status(410).entity(e.getMessage()).build();
         } finally {
             client.logout();
         }
@@ -94,8 +101,8 @@ public class UpdateApp {
         }
     }
 
-    private Map<String, Matcher> getMatchers(CloudApplication app, JSONObject descr) {
-        String repoVer = String.valueOf(descr.get("appVersion"));
+    private Map<String, Matcher> getMatchers(CloudApplication app, JSONObject appJson) {
+        String repoVer = String.valueOf(appJson.get("appVersion"));
         String currentVer = app.getEnvAsMap().get("appVersion");
 
         Pattern pattern = Pattern.compile("^(\\d).(\\d).(\\d)$");
