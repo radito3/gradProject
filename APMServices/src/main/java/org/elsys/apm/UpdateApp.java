@@ -52,17 +52,19 @@ public class UpdateApp {
             Matcher currentVerMatch = getMatchers(app, appJson).get("currentVerMatch");
 
             if (repoVerMatch.matches() && currentVerMatch.matches()) {
-                if (Integer.parseInt(currentVerMatch.group(1)) >= Integer.parseInt(repoVerMatch.group(1))
-                        || Integer.parseInt(currentVerMatch.group(2)) >= Integer.parseInt(repoVerMatch.group(2))) {
-                    return Response.status(200).entity("App up-to-date").build();
-                }
+                //could make a recursive function checking the versions
+                if (Integer.parseInt(currentVerMatch.group(1)) < Integer.parseInt(repoVerMatch.group(1))
+                        || Integer.parseInt(currentVerMatch.group(2)) < Integer.parseInt(repoVerMatch.group(2))) {
 
-                JSONArray files = (JSONArray) appJson.get("files");
-                StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.STATIC_APP_URL);
-                for (Object file : files) {
-                    String fileName = String.valueOf(file);
-                    staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
-                    uploadApp(staticAppUrl.toString(), appName, fileName);
+                    JSONArray files = (JSONArray) appJson.get("files");
+                    StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.STATIC_APP_URL);
+                    for (Object file : files) {
+                        String fileName = String.valueOf(file);
+                        staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
+                        uploadApp(staticAppUrl.toString(), appName, fileName);
+                    }
+                } else { //version comparison if
+                    return Response.status(200).entity("App up-to-date").build();
                 }
             }
 
