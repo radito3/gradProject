@@ -11,7 +11,7 @@
         "files": [
             "TodoList-1.0-SNAPSHOT.war"
         ],
-        "appVersion": "1.0.0",
+        "appVersion": "1.1.0",
         "language": "java"
     },
     "App2": {
