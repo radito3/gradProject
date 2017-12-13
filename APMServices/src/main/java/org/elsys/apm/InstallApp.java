@@ -43,8 +43,8 @@ public class InstallApp {
                 throw new ClassNotFoundException("App " + appName + " not found");
             }
 
-            JSONObject appLang = (JSONObject) app.get("language");
-            if (appLang == null) {
+            String appLang = String.valueOf(app.get("language"));
+            if (appLang.equals("null")) {
                 throw new IllegalStateException("Multi-language support not yet implemented");
             }
 
