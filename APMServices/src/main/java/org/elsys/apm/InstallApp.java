@@ -79,7 +79,15 @@ public class InstallApp {
         try {
             URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-            InputStream in = con.getInputStream();
+            pushApplications(con, appName, fileName, buildpackUrl);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void pushApplications(HttpsURLConnection con, String appName, String fileName, String buildpackUrl)
+            throws IOException {
+        try(InputStream in = con.getInputStream()){
 
             String nameToUpload = Objects.equals(appName.toLowerCase(), fileName.split("-")[0].toLowerCase()) ?
                     appName : fileName.split("-")[0];
@@ -92,10 +100,6 @@ public class InstallApp {
             client.uploadApp(name, fileName, in, UploadStatusCallback.NONE);
 
             client.updateAppEnv(appName, ImmutableMap.of("appVersion", "1.0.0"));
-
-            in.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
