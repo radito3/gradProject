@@ -5,6 +5,7 @@ import org.elsys.apm.todo.*;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -33,13 +34,14 @@ public class TodoListApp {
         result.append("Todo List tasks:\n");
         stream.forEach(t -> {
             result.append("Task: ").append(t.getDescription())
-                    .append("\n\t")
-                    .append("Status: ").append(t.getStatus())
-                    .append("\n\t")
-                    .append("Priority: ").append(t.getPriority())
-                    .append("\n\t")
-                    .append("Tags: ").append(t.getTags())
-                    .append("\n");
+                .append("\n\t")
+                .append("Status: ").append(t.getStatus())
+                .append("\n\t")
+                .append("Priority: ").append(t.getPriority())
+                .append("\n\t")
+                .append("Tags: ");
+            Arrays.stream(t.getTags()).forEach(tag -> result.append(tag).append(" "));
+            result.append("\n");
         });
         return result.toString();
     }

@@ -15,6 +15,8 @@ interface DescriptorWork {
 
     String STATIC_APP_URL = System.getenv("staticAppUrl");
 
+    String DESCRIPTOR_URL = STATIC_APP_URL.concat("/descriptor.json");
+
     static JSONObject getDescriptor(String uri) throws IOException, ParseException {
         StringBuilder json = new StringBuilder();
         URL url = new URL(uri);

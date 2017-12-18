@@ -1,8 +1,5 @@
 package org.elsys.apm;
 
-/**
- * For future implementation of applications in languages other than Java
- */
 enum Buildpacks {
 
     JAVA("https://github.com/cloudfoundry/java-buildpack.git"),

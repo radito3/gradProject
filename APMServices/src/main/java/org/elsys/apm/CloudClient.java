@@ -66,6 +66,6 @@ class CloudClient {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        return null;
+        return URL.class.getResource("");
     }
 }

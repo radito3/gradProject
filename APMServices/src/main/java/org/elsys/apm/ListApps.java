@@ -18,7 +18,7 @@ public class ListApps {
     public Response getListApps() {
         StringBuilder result = new StringBuilder();
         try {
-            JSONObject descr = DescriptorWork.getDescriptor(DescriptorWork.STATIC_APP_URL + "/descriptor.json");
+            JSONObject descr = DescriptorWork.getDescriptor(DescriptorWork.DESCRIPTOR_URL);
             descr.keySet().stream().forEach(key -> result.append(key).append('\n'));
         } catch (IOException | ParseException e) {
             e.printStackTrace();

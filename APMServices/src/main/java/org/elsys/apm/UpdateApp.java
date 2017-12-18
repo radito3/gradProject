@@ -8,6 +8,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpStatus;
+import org.modeshape.common.text.Inflector;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.*;
@@ -38,26 +39,36 @@ public class UpdateApp {
         client = new CloudClient(orgName, spaceName, token);
         client.login();
 
-        StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.STATIC_APP_URL);
         try {
             CloudApplication app = client.getApp(appName);
-            JSONObject descr = DescriptorWork.getDescriptor(DescriptorWork.STATIC_APP_URL + "/descriptor.json");
-            Matcher repoVerMatch = getMatchers(app, descr).get("repoVerMatch");
-            Matcher currentVerMatch = getMatchers(app, descr).get("currentVerMatch");
+            JSONObject descr = DescriptorWork.getDescriptor(DescriptorWork.DESCRIPTOR_URL);
+
+            JSONObject appJson = (JSONObject) descr.get(Inflector.getInstance().upperCamelCase(appName));
+            if (appJson == null) {
+                throw new IllegalArgumentException("App " + appName + " no longer supported");
+            }
+
+            Matcher repoVerMatch = getMatchers(app, appJson).get("repoVerMatch");
+            Matcher currentVerMatch = getMatchers(app, appJson).get("currentVerMatch");
 
             if (repoVerMatch.matches() && currentVerMatch.matches()) {
-                if (Integer.parseInt(currentVerMatch.group(1)) >= Integer.parseInt(repoVerMatch.group(1))
-                        || Integer.parseInt(currentVerMatch.group(2)) >= Integer.parseInt(repoVerMatch.group(2))) {
+                int currentVerMajor = Integer.parseInt(currentVerMatch.group(1));
+                int currentVerMinor = Integer.parseInt(currentVerMatch.group(2));
+
+                int repoVerMajor = Integer.parseInt(repoVerMatch.group(1));
+                int repoVerMinor = Integer.parseInt(repoVerMatch.group(2));
+                //could make a recursive function checking the versions
+                if (currentVerMajor < repoVerMajor || currentVerMinor < repoVerMinor) {
+
+                    JSONArray files = (JSONArray) appJson.get("files");
+                    StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.STATIC_APP_URL + "/text.txt");
+                    for (Object file : files) {
+                        String fileName = String.valueOf(file);
+                        staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
+                        uploadApp(staticAppUrl.toString(), appName, fileName, String.valueOf(appJson.get("appVersion")));
+                    }
+                } else { //version comparison if
                     return Response.status(200).entity("App up-to-date").build();
-                }
-
-                JSONObject appJson = (JSONObject) descr.get(appName);
-                JSONArray files = (JSONArray) appJson.get("files");
-
-                for (Object file : files) {
-                    String fileName = String.valueOf(file);
-                    staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
-                    uploadApp(staticAppUrl.toString(), appName, fileName);
                 }
             }
 
@@ -69,6 +80,8 @@ public class UpdateApp {
             }
         } catch (ParseException | IOException e) {
             e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            return Response.status(410).entity(e.getMessage()).build();
         } finally {
             client.logout();
         }
@@ -76,7 +89,7 @@ public class UpdateApp {
         return Response.status(202).entity("App updated").build();
     }
 
-    private void uploadApp(String uri, String appName, String fileName) throws IOException {
+    private void uploadApp(String uri, String appName, String fileName, String appVer) throws IOException {
         InputStream in = null;
         try {
             URL url = new URL(uri);
@@ -87,6 +100,7 @@ public class UpdateApp {
                     appName : fileName.split("-")[0];
 
             client.uploadApp(nameToUpload, fileName, in, UploadStatusCallback.NONE);
+            client.updateAppEnv(nameToUpload, ImmutableMap.of("appVersion", appVer));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -94,8 +108,8 @@ public class UpdateApp {
         }
     }
 
-    private Map<String, Matcher> getMatchers(CloudApplication app, JSONObject descr) {
-        String repoVer = String.valueOf(descr.get("appVersion"));
+    private Map<String, Matcher> getMatchers(CloudApplication app, JSONObject appJson) {
+        String repoVer = String.valueOf(appJson.get("appVersion"));
         String currentVer = app.getEnvAsMap().get("appVersion");
 
         Pattern pattern = Pattern.compile("^(\\d).(\\d).(\\d)$");
