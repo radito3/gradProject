@@ -40,8 +40,8 @@ func httpCall(method string, uri string, token string) (string, error) {
 
 func (c *client) manageApmCalls(args ...string) (string, error) {
 	apmCall = args[0], httpVerb = args[1], appName = args[2]
-	var uri = []string {"https://", c.app.Routes[0].Host, ".", c.app.Routes[0].Domain.Name, fmt.Sprintf("/%s/%s/%s/%s", c.org, c.space, apmCall, appName)}
-	resp, err := httpCall(httpVerb, strings.Join(uri, ""), c.token)
+	uri = fmt.Sprintf("https://%s.%s/%s/%s/%s/%s", c.app.Routes[0].Host, c.app.Routes[0].Domain.Name, c.org, c.space, apmCall, appName)
+	resp, err := httpCall(httpVerb, uri, c.token)
 	if err != nil {
 		return "", errors.New(fmt.Sprintf("%s", err))
 	}
