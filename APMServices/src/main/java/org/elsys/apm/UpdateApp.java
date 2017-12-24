@@ -6,7 +6,6 @@ import org.cloudfoundry.client.lib.UploadStatusCallback;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpStatus;
 import org.modeshape.common.text.Inflector;
 
@@ -61,7 +60,7 @@ public class UpdateApp {
                 if (currentVerMajor < repoVerMajor || currentVerMinor < repoVerMinor) {
 
                     JSONArray files = (JSONArray) appJson.get("files");
-                    StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.STATIC_APP_URL + "/text.txt");
+                    StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.DESCRIPTOR_URL);
                     for (Object file : files) {
                         String fileName = String.valueOf(file);
                         staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
@@ -78,8 +77,6 @@ public class UpdateApp {
             } else {
                 return Response.status(Integer.parseInt(e.getStatusCode().toString())).entity(e.getMessage()).build();
             }
-        } catch (ParseException | IOException e) {
-            e.printStackTrace();
         } catch (IllegalArgumentException e) {
             return Response.status(410).entity(e.getMessage()).build();
         } finally {
@@ -89,22 +86,26 @@ public class UpdateApp {
         return Response.status(202).entity("App updated").build();
     }
 
-    private void uploadApp(String uri, String appName, String fileName, String appVer) throws IOException {
-        InputStream in = null;
+    private void uploadApp(String uri, String appName, String fileName, String appVer) {
         try {
             URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-            in = con.getInputStream();
+            pushApps(con, appName, fileName, appVer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-            String nameToUpload = Objects.equals(appName.toLowerCase(), fileName.split("-")[0].toLowerCase()) ?
-                    appName : fileName.split("-")[0];
+    private void pushApps(HttpsURLConnection con, String appName, String fileName, String appVer) throws IOException {
+        try (InputStream in = con.getInputStream()) {
+
+            String fileNameL = fileName.split("[^a-zA-Z0-9]")[0]; //untested
+
+            String nameToUpload = Objects.equals(appName.toLowerCase(), fileNameL.toLowerCase()) ?
+                    appName : fileNameL;
 
             client.uploadApp(nameToUpload, fileName, in, UploadStatusCallback.NONE);
             client.updateAppEnv(nameToUpload, ImmutableMap.of("appVersion", appVer));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            Objects.requireNonNull(in).close();
         }
     }
 

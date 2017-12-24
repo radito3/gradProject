@@ -5,7 +5,6 @@ import org.cloudfoundry.client.lib.UploadStatusCallback;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 import org.modeshape.common.text.Inflector;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -35,9 +34,9 @@ public class InstallApp {
         client = new CloudClient(orgName, spaceName, token);
         client.login();
 
-        StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.STATIC_APP_URL);
+        StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.DESCRIPTOR_URL);
         try {
-            JSONObject descr = DescriptorWork.getDescriptor(staticAppUrl.append("/descriptor.json").toString());
+            JSONObject descr = DescriptorWork.getDescriptor(staticAppUrl.toString());
             JSONObject app = (JSONObject) descr.get(appName);
             if (app == null) {
                 throw new ClassNotFoundException("App " + appName + " not found");
@@ -60,8 +59,6 @@ public class InstallApp {
                 installApp(staticAppUrl.toString(), appName, fileName, buildpackUrl);
             }
 
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
         } catch (ClassNotFoundException e) {
             return Response.status(404).entity(e.getMessage()).build();
         } catch (IllegalStateException e) {
@@ -87,10 +84,12 @@ public class InstallApp {
 
     private void pushApplications(HttpsURLConnection con, String appName, String fileName, String buildpackUrl)
             throws IOException {
-        try(InputStream in = con.getInputStream()){
+        try (InputStream in = con.getInputStream()) {
 
-            String nameToUpload = Objects.equals(appName.toLowerCase(), fileName.split("-")[0].toLowerCase()) ?
-                    appName : fileName.split("-")[0];
+            String fileNameL = fileName.split("[^a-zA-Z0-9]")[0]; //untested
+
+            String nameToUpload = Objects.equals(appName.toLowerCase(), fileNameL.toLowerCase()) ?
+                    appName : fileNameL;
 
             String name = Inflector.getInstance().lowerCamelCase(nameToUpload);
 

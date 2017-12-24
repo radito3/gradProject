@@ -1,6 +1,7 @@
 package main
 
 import (
+	"code.cloudfoundry.org/cli/plugin/models"
 	"fmt"
 	"net/http"
 	"code.cloudfoundry.org/cli/plugin"
@@ -15,7 +16,7 @@ type client struct {
 	org string
 	space string
 	token string
-	app plugin.GetAppModel
+	app plugin_models.GetAppModel
 }
 
 func httpCall(method string, uri string, token string) (string, error) {
@@ -39,8 +40,10 @@ func httpCall(method string, uri string, token string) (string, error) {
 }
 
 func (c *client) manageApmCalls(args ...string) (string, error) {
-	apmCall = args[0], httpVerb = args[1], appName = args[2]
-	uri = fmt.Sprintf("https://%s.%s/%s/%s/%s/%s", c.app.Routes[0].Host, c.app.Routes[0].Domain.Name, c.org, c.space, apmCall, appName)
+	var apmCall = args[0]
+	var httpVerb = args[1]
+	var appName = args[2]
+	var uri = fmt.Sprintf("https://%s.%s/%s/%s/%s/%s", c.app.Routes[0].Host, c.app.Routes[0].Domain.Name, c.org, c.space, apmCall, appName)
 	resp, err := httpCall(httpVerb, uri, c.token)
 	if err != nil {
 		return "", errors.New(fmt.Sprintf("%s", err))

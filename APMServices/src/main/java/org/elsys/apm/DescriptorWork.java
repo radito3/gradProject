@@ -11,29 +11,45 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-interface DescriptorWork {
+abstract class DescriptorWork {
 
-    String STATIC_APP_URL = System.getenv("staticAppUrl");
+    static String DESCRIPTOR_URL = System.getenv("staticAppUrl").concat("/descriptor.json");
 
-    String DESCRIPTOR_URL = STATIC_APP_URL.concat("/descriptor.json");
-
-    static JSONObject getDescriptor(String uri) throws IOException, ParseException {
-        StringBuilder json = new StringBuilder();
-        URL url = new URL(uri);
-        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-        InputStream in = con.getInputStream();
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-
-        String line;
-        while ((line = br.readLine()) != null) {
-            json.append(line).append('\n');
+    static JSONObject getDescriptor(String uri) {
+        HttpsURLConnection con = null;
+        try {
+            URL url = new URL(uri);
+            con = (HttpsURLConnection) url.openConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return fnc(con);
+    }
 
-        JSONParser parser = new JSONParser();
-        JSONObject obj = (JSONObject) parser.parse(json.toString());
+    private static JSONObject fnc(HttpsURLConnection connection) {
+        try (InputStream in = connection.getInputStream()) {
+            return fnc1(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-        in.close();
-        br.close();
-        return obj;
+    private static JSONObject fnc1(InputStream inputStream) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+
+            StringBuilder json = new StringBuilder();
+            JSONParser parser = new JSONParser();
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                json.append(line).append('\n');
+            }
+
+            return (JSONObject) parser.parse(json.toString());
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
