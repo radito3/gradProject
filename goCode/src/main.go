@@ -86,7 +86,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 
 	if args[0] == "install" {
 		if len(args) < 2 {
-			fmt.Println("Incorrect usage.\nCorrect usage: cf apm install <app_name>")
+			fmt.Println("Incorrect usage.\nCorrect usage: cf install <app_name>")
 			return
 		}
 		resp, err := client.manageApmCalls("install", "POST", args[2])
@@ -99,7 +99,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 
 	if args[0] == "update" {
 		if len(args) < 2 {
-			fmt.Println("Incorrect usage.\nCorrect usage: cf apm update <app_name>")
+			fmt.Println("Incorrect usage.\nCorrect usage: cf update <app_name>")
 			return
 		}
 		resp, err := client.manageApmCalls("update", "PUT", args[2])
@@ -112,7 +112,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 
 	if args[0] == "apm-delete" {
 		if len(args) < 2 {
-			fmt.Println("Incorrect usage.\nCorrect usage: cf apm delete <app_name>")
+			fmt.Println("Incorrect usage.\nCorrect usage: cf apm-delete <app_name>")
 			return
 		}
 		resp, err := client.manageApmCalls("delete", "DELETE", args[2])
@@ -156,7 +156,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 				Name:     "apm-delete",
 				HelpText: "Command for deleting apps",
 				UsageDetails: plugin.Usage{
-					Usage: "cf delete <app_name>",
+					Usage: "cf apm-delete <app_name>",
 				},
 			},
 			{
