@@ -111,6 +111,7 @@ public class InstallApp {
             case "go": return Buildpacks.GO.getUrl();
             case "php": return Buildpacks.PHP.getUrl();
             case "hwc": return Buildpacks.HWC.getUrl();
+            case "dotnet": return Buildpacks.DOTNET.getUrl();
             default: return "Unsupported language";
         }
     }

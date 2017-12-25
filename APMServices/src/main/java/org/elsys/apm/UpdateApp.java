@@ -51,13 +51,8 @@ public class UpdateApp {
             Matcher currentVerMatch = getMatchers(app, appJson).get("currentVerMatch");
 
             if (repoVerMatch.matches() && currentVerMatch.matches()) {
-                int currentVerMajor = Integer.parseInt(currentVerMatch.group(1));
-                int currentVerMinor = Integer.parseInt(currentVerMatch.group(2));
 
-                int repoVerMajor = Integer.parseInt(repoVerMatch.group(1));
-                int repoVerMinor = Integer.parseInt(repoVerMatch.group(2));
-                //could make a recursive function checking the versions
-                if (currentVerMajor < repoVerMajor || currentVerMinor < repoVerMinor) {
+                if (checkVer(currentVerMatch, repoVerMatch, 1)) {
 
                     JSONArray files = (JSONArray) appJson.get("files");
                     StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.DESCRIPTOR_URL);
@@ -66,7 +61,7 @@ public class UpdateApp {
                         staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
                         uploadApp(staticAppUrl.toString(), appName, fileName, String.valueOf(appJson.get("appVersion")));
                     }
-                } else { //version comparison if
+                } else {
                     return Response.status(200).entity("App up-to-date").build();
                 }
             }
@@ -84,6 +79,16 @@ public class UpdateApp {
         }
 
         return Response.status(202).entity("App updated").build();
+    }
+
+    private boolean checkVer(Matcher matcher1, Matcher matcher2, int depth) {
+        if (Integer.parseInt(matcher1.group(depth)) < Integer.parseInt(matcher2.group(depth))) {
+            return true;
+        } else if (depth == 3) {
+            return false;
+        } else {
+            return checkVer(matcher1, matcher2, depth + 1);
+        }
     }
 
     private void uploadApp(String uri, String appName, String fileName, String appVer) {

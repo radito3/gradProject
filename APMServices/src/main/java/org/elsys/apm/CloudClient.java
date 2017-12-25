@@ -23,11 +23,13 @@ class CloudClient {
     private CloudControllerClient client;
 
     CloudClient(String org, String space, String token) {
+        String tokenStr = token.split(" ")[1];
+
         CloudControllerClientFactory cloudFactory = new CloudControllerClientFactory(null, true);
 
-        client = cloudFactory.newCloudController(getTargetUrl(),
-                new CloudCredentials(new DefaultOAuth2AccessToken(token.split(" ")[1]), false),
-                org, space);
+        CloudCredentials credentials = new CloudCredentials(new DefaultOAuth2AccessToken(tokenStr), false);
+
+        client = cloudFactory.newCloudController(getTargetUrl(), credentials, org, space);
     }
 
     void login() {
