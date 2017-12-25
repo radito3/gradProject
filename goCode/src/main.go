@@ -85,7 +85,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	}
 
 	if args[0] == "install" {
-		if len(args) < 3 {
+		if len(args) < 2 {
 			fmt.Println("Incorrect usage.\nCorrect usage: cf apm install <app_name>")
 			return
 		}
@@ -98,7 +98,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	}
 
 	if args[0] == "update" {
-		if len(args) < 3 {
+		if len(args) < 2 {
 			fmt.Println("Incorrect usage.\nCorrect usage: cf apm update <app_name>")
 			return
 		}
@@ -111,7 +111,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	}
 
 	if args[0] == "apm-delete" {
-		if len(args) < 3 {
+		if len(args) < 2 {
 			fmt.Println("Incorrect usage.\nCorrect usage: cf apm delete <app_name>")
 			return
 		}
@@ -130,7 +130,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType{
 			Major: 6,
 			Minor: 0,
-			Build: 0,
+			Build: 1,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,
