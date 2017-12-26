@@ -54,19 +54,19 @@ func (c *client) manageApmCalls(args ...string) (string, error) {
 }
 
 func getClient(con plugin.CliConnection) (*client, error) {
-	app, err := cliConnection.GetApp("apmServices") // may change the name getting
+	app, err := con.GetApp("apmServices") // may change the name getting
 	if err != nil {
 		return nil, fmt.Errorf("%s", err)
 	}
-	org, err := cliConnection.GetCurrentOrg()
+	org, err := con.GetCurrentOrg()
 	if err != nil {
 		return nil, fmt.Errorf("%s", err)
 	}
-	space, err := cliConnection.GetCurrentSpace()
+	space, err := con.GetCurrentSpace()
 	if err != nil {
 		return nil, fmt.Errorf("%s", err)
 	}
-	token, err := cliConnection.AccessToken()
+	token, err := con.AccessToken()
 	if err != nil {
 		return nil, fmt.Errorf("%s", err)
 	}
