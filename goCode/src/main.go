@@ -51,28 +51,34 @@ func (c *client) manageApmCalls(args ...string) (string, error) {
 	return resp, nil
 }
 
-func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
+func getClient(con plugin.CliConnection) (*client, error) {
 	app, err := cliConnection.GetApp("apmServices") // may change the name getting
 	if err != nil {
-		fmt.Println(err)
-		return
+		return nil, fmt.Errorf("%s", err)
 	}
 	org, err := cliConnection.GetCurrentOrg()
 	if err != nil {
-		fmt.Println(err)
-		return
+		return nil, fmt.Errorf("%s", err)
 	}
 	space, err := cliConnection.GetCurrentSpace()
 	if err != nil {
-		fmt.Println(err)
-		return
+		return nil, fmt.Errorf("%s", err)
 	}
 	token, err := cliConnection.AccessToken()
+	if err != nil {
+		return nil, fmt.Errorf("%s", err)
+	}
+	c := &client{org: org.Name, space: space.Name, token: token, app: app}
+	return c, nil
+}
+
+func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
+	cl, err := getClient(cliConnection)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	client := client{org: org.Name, space: space.Name, token: token, app: app}
+	client := *cl
 
 	if args[0] == "list-apps" {
 		var uri = []string{"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/list_repo_apps"}
