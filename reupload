@@ -6,7 +6,7 @@ rm ~/Repos/gradProject/goCode/bin/main
 
 go build ~/Repos/gradProject/goCode/src/main.go
 
-mv ~/Repos/gradProject/goCode/src/main ~/Repos/gradProject/goCode/bin/
+mv ~/Repos/gradProject/main ~/Repos/gradProject/goCode/bin/
 
 cf uninstall-plugin apmPlugin
 

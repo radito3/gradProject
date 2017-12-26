@@ -89,7 +89,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Println("Incorrect usage.\nCorrect usage: cf install <app_name>")
 			return
 		}
-		resp, err := client.manageApmCalls("install", "POST", args[2])
+		resp, err := client.manageApmCalls("install", "POST", args[1])
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -102,7 +102,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Println("Incorrect usage.\nCorrect usage: cf update <app_name>")
 			return
 		}
-		resp, err := client.manageApmCalls("update", "PUT", args[2])
+		resp, err := client.manageApmCalls("update", "PUT", args[1])
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -110,12 +110,12 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 		fmt.Println(resp)
 	}
 
-	if args[0] == "apm-delete" {
+	if args[0] == "remove" {
 		if len(args) < 2 {
-			fmt.Println("Incorrect usage.\nCorrect usage: cf apm-delete <app_name>")
+			fmt.Println("Incorrect usage.\nCorrect usage: cf remove <app_name>")
 			return
 		}
-		resp, err := client.manageApmCalls("delete", "DELETE", args[2])
+		resp, err := client.manageApmCalls("delete", "DELETE", args[1])
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -129,7 +129,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Name: "apmPlugin",
 		Version: plugin.VersionType{
 			Major: 6,
-			Minor: 0,
+			Minor: 1,
 			Build: 1,
 		},
 		MinCliVersion: plugin.VersionType{
@@ -153,10 +153,10 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 				},
 			},
 			{
-				Name:     "apm-delete",
+				Name:     "remove",
 				HelpText: "Command for deleting apps",
 				UsageDetails: plugin.Usage{
-					Usage: "cf apm-delete <app_name>",
+					Usage: "cf remove <app_name>",
 				},
 			},
 			{
