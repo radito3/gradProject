@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,21 +50,20 @@ public class UpdateApp {
             Matcher currentVerMatch = getMatchers(app, appJson).get("currentVerMatch");
 
             if (repoVerMatch.matches() && currentVerMatch.matches()) {
-
                 if (checkVer(currentVerMatch, repoVerMatch, 1)) {
 
                     JSONArray files = (JSONArray) appJson.get("files");
-                    StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.DESCRIPTOR_URL);
+                    StringBuilder downloadUrl = new StringBuilder(DescriptorWork.DESCRIPTOR_URL);
                     for (Object file : files) {
-                        String fileName = String.valueOf(file);
-                        staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
-                        uploadApp(staticAppUrl.toString(), appName, fileName, String.valueOf(appJson.get("appVersion")));
+                        String fileName = fileNameToDownload(appJson, String.valueOf(file));
+                        downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), fileName);
+
+                        uploadApp(downloadUrl.toString(), appName, fileName, appJson);
                     }
                 } else {
                     return Response.status(200).entity("App up-to-date").build();
                 }
             }
-
         } catch (CloudFoundryException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 return Response.status(404).entity("App " + appName + " not found").build();
@@ -91,26 +89,38 @@ public class UpdateApp {
         }
     }
 
-    private void uploadApp(String uri, String appName, String fileName, String appVer) {
+    private String fileNameToDownload(JSONObject appJson, String fileName) {
+        String repoAppName = String.valueOf(appJson.get("repoAppName"));
+        if (repoAppName.equals("null")) {
+            return fileName;
+        } else {
+            return repoAppName;
+        }
+    }
+
+    private void uploadApp(String uri, String appName, String fileName, JSONObject appJson) {
         try {
             URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+            String appVer = String.valueOf(appJson.get("appVersion"));
+
             pushApps(con, appName, fileName, appVer);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void pushApps(HttpsURLConnection con, String appName, String fileName, String appVer) throws IOException {
+    private void pushApps(HttpsURLConnection con, String... args) throws IOException {
         try (InputStream in = con.getInputStream()) {
+            String appName = args[0];
+            String fileName = args[1];
+            String execFileName = fileName.split("[^a-zA-Z0-9]")[0];
 
-            String fileNameL = fileName.split("[^a-zA-Z0-9]")[0]; //untested
-
-            String nameToUpload = Objects.equals(appName.toLowerCase(), fileNameL.toLowerCase()) ?
-                    appName : fileNameL;
+            String nameToUpload = appName.toLowerCase().equals(execFileName.toLowerCase()) ? appName : execFileName;
 
             client.uploadApp(nameToUpload, fileName, in, UploadStatusCallback.NONE);
-            client.updateAppEnv(nameToUpload, ImmutableMap.of("appVersion", appVer));
+
+            client.updateAppEnv(nameToUpload, ImmutableMap.of("appVersion", args[2])); //should test if this erases the repoAppName
         }
     }
 

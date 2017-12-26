@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
-import java.util.Objects;
 
 @Path("/{org}/{space}/install/{appName}")
 public class InstallApp {
@@ -56,9 +55,9 @@ public class InstallApp {
             for (Object file : files) {
                 String fileName = String.valueOf(file);
                 staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
+
                 installApp(staticAppUrl.toString(), appName, fileName, buildpackUrl);
             }
-
         } catch (ClassNotFoundException e) {
             return Response.status(404).entity(e.getMessage()).build();
         } catch (IllegalStateException e) {
@@ -72,11 +71,12 @@ public class InstallApp {
         return Response.status(201).entity("App installed successfully").build();
     }
 
-    private void installApp(String uri, String appName, String fileName, String buildpackUrl) {
+    private void installApp(String... args) {
         try {
-            URL url = new URL(uri);
+            URL url = new URL(args[0]);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-            pushApplications(con, appName, fileName, buildpackUrl);
+
+            pushApplications(con, args[1], args[2], args[3]);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -85,11 +85,16 @@ public class InstallApp {
     private void pushApplications(HttpsURLConnection con, String appName, String fileName, String buildpackUrl)
             throws IOException {
         try (InputStream in = con.getInputStream()) {
+            String execFileName = fileName.split("[^a-zA-Z0-9]")[0];
+            String repoAppName = "";
+            String nameToUpload;
 
-            String fileNameL = fileName.split("[^a-zA-Z0-9]")[0]; //untested
-
-            String nameToUpload = Objects.equals(appName.toLowerCase(), fileNameL.toLowerCase()) ?
-                    appName : fileNameL;
+            if (appName.toLowerCase().equals(execFileName.toLowerCase())) {
+                nameToUpload = appName;
+            } else {
+                nameToUpload = execFileName;
+                repoAppName = appName;
+            }
 
             String name = Inflector.getInstance().lowerCamelCase(nameToUpload);
 
@@ -98,7 +103,8 @@ public class InstallApp {
 
             client.uploadApp(name, fileName, in, UploadStatusCallback.NONE);
 
-            client.updateAppEnv(appName, ImmutableMap.of("appVersion", "1.0.0"));
+            client.updateAppEnv(appName, repoAppName.isEmpty() ? ImmutableMap.of("appVersion", "1.0.0") :
+                    ImmutableMap.of("appVersion", "1.0.0", "repoAppName", repoAppName));
         }
     }
 
