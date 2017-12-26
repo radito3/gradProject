@@ -40,10 +40,12 @@ func httpCall(method string, uri string, token string) (string, error) {
 }
 
 func (c *client) manageApmCalls(args ...string) (string, error) {
-	var apmCall = args[0]
-	var httpVerb = args[1]
-	var appName = args[2]
-	var uri = fmt.Sprintf("https://%s.%s/%s/%s/%s/%s", c.app.Routes[0].Host, c.app.Routes[0].Domain.Name, c.org, c.space, apmCall, appName)
+	var (
+		apmCall = args[0]
+		httpVerb = args[1]
+		appName = args[2]
+	)
+	uri := fmt.Sprintf("https://%s.%s/%s/%s/%s/%s", c.app.Routes[0].Host, c.app.Routes[0].Domain.Name, c.org, c.space, apmCall, appName)
 	resp, err := httpCall(httpVerb, uri, c.token)
 	if err != nil {
 		return "", fmt.Errorf("%s", err)
@@ -81,7 +83,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	client := *cl
 
 	if args[0] == "list-apps" {
-		var uri = []string{"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/list_repo_apps"}
+		uri := []string{"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/list_repo_apps"}
 		resp, err := httpCall("GET", strings.Join(uri, ""), token)
 		if err != nil {
 			fmt.Println(err)
@@ -136,7 +138,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType{
 			Major: 6,
 			Minor: 1,
-			Build: 1,
+			Build: 2,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,
