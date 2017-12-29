@@ -16,9 +16,9 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Path("/{org}/{space}/update/{appName}")
 public class UpdateApp {
@@ -46,29 +46,26 @@ public class UpdateApp {
                 throw new IllegalArgumentException("App " + appName + " no longer supported");
             }
 
-            Matcher repoVerMatch = getMatchers(app, appJson).get("repoVerMatch");
-            Matcher currentVerMatch = getMatchers(app, appJson).get("currentVerMatch");
+            List<List<Integer>> versions = getVersions(app, appJson);
 
-            if (repoVerMatch.matches() && currentVerMatch.matches()) {
-                if (checkVer(currentVerMatch, repoVerMatch, 1)) {
+            if (checkVer(versions.get(0), versions.get(1), 0)) {
+                JSONArray files = (JSONArray) appJson.get("files");
+                StringBuilder downloadUrl = new StringBuilder(DescriptorWork.DESCRIPTOR_URL);
 
-                    JSONArray files = (JSONArray) appJson.get("files");
-                    StringBuilder downloadUrl = new StringBuilder(DescriptorWork.DESCRIPTOR_URL);
-                    for (Object file : files) {
-                        String fileName = fileNameToDownload(appJson, String.valueOf(file));
-                        downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), fileName);
+                for (Object file : files) {
+                    String fileName = fileNameToDownload(app, String.valueOf(file));
+                    downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), fileName);
 
-                        uploadApp(downloadUrl.toString(), appName, fileName, appJson);
-                    }
-                } else {
-                    return Response.status(200).entity("App up-to-date").build();
+                    uploadApp(appJson, downloadUrl.toString(), appName, fileName);
                 }
+            } else {
+                return Response.status(200).entity("App up-to-date").build();
             }
         } catch (CloudFoundryException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 return Response.status(404).entity("App " + appName + " not found").build();
             } else {
-                return Response.status(Integer.parseInt(e.getStatusCode().toString())).entity(e.getMessage()).build();
+                return Response.status(e.getStatusCode().value()).entity(e.getMessage()).build();
             }
         } catch (IllegalArgumentException e) {
             return Response.status(410).entity(e.getMessage()).build();
@@ -79,32 +76,27 @@ public class UpdateApp {
         return Response.status(202).entity("App updated").build();
     }
 
-    private boolean checkVer(Matcher matcher1, Matcher matcher2, int depth) {
-        if (Integer.parseInt(matcher1.group(depth)) < Integer.parseInt(matcher2.group(depth))) {
+    private boolean checkVer(List<Integer> currentVers, List<Integer> repoVers, int depth) {
+        if (currentVers.get(depth) < repoVers.get(depth)) {
             return true;
-        } else if (depth == 3) {
+        } else if (depth == 2) {
             return false;
         } else {
-            return checkVer(matcher1, matcher2, depth + 1);
+            return checkVer(currentVers, repoVers, depth + 1);
         }
     }
 
-    private String fileNameToDownload(JSONObject appJson, String fileName) {
-        String repoAppName = String.valueOf(appJson.get("repoAppName"));
-        if (repoAppName.equals("null")) {
-            return fileName;
-        } else {
-            return repoAppName;
-        }
+    private String fileNameToDownload(CloudApplication app, String fileName) {
+        String repoAppName = app.getEnvAsMap().get("repoAppName");
+        return repoAppName == null ? fileName : repoAppName;
     }
 
-    private void uploadApp(String uri, String appName, String fileName, JSONObject appJson) {
+    private void uploadApp(JSONObject appJson, String... args) {
         try {
-            URL url = new URL(uri);
+            URL url = new URL(args[0]);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-            String appVer = String.valueOf(appJson.get("appVersion"));
 
-            pushApps(con, appName, fileName, appVer);
+            pushApps(con, args[1], args[2], String.valueOf(appJson.get("appVersion")));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -124,14 +116,16 @@ public class UpdateApp {
         }
     }
 
-    private Map<String, Matcher> getMatchers(CloudApplication app, JSONObject appJson) {
+    private List<List<Integer>> getVersions(CloudApplication app, JSONObject appJson) {
         String repoVer = String.valueOf(appJson.get("appVersion"));
         String currentVer = app.getEnvAsMap().get("appVersion");
 
-        Pattern pattern = Pattern.compile("^(\\d).(\\d).(\\d)$");
-        Matcher repoVerMatch = pattern.matcher(repoVer);
-        Matcher currentVerMatch = pattern.matcher(currentVer);
+        List<Integer> repoVersions = new ArrayList<>();
+        List<Integer> currentVersions = new ArrayList<>();
 
-        return ImmutableMap.of("repoVerMatch", repoVerMatch, "currentVerMatch", currentVerMatch);
+        Arrays.stream(currentVer.split("\\.")).forEach(ver -> currentVersions.add(Integer.parseInt(ver)));
+        Arrays.stream(repoVer.split("\\.")).forEach(ver -> repoVersions.add(Integer.parseInt(ver)));
+
+        return Arrays.asList(currentVersions, repoVersions);
     }
 }

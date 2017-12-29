@@ -30,7 +30,7 @@ public class DeleteApp {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 return Response.status(404).entity("App " + appName + " not found").build();
             } else {
-                return Response.status(Integer.parseInt(e.getStatusCode().toString())).entity(e.getMessage()).build();
+                return Response.status(e.getStatusCode().value()).entity(e.getMessage()).build();
             }
         } finally {
             client.logout();
