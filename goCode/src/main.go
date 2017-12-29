@@ -41,9 +41,9 @@ func httpCall(method string, uri string, token string) (string, error) {
 
 func (c *client) manageApmCalls(args ...string) (string, error) {
 	var (
-		apmCall = args[0]
+		apmCall  = args[0]
 		httpVerb = args[1]
-		appName = args[2]
+		appName  = args[2]
 	)
 	uri := fmt.Sprintf("https://%s.%s/%s/%s/%s/%s", c.app.Routes[0].Host, c.app.Routes[0].Domain.Name, c.org, c.space, apmCall, appName)
 	resp, err := httpCall(httpVerb, uri, c.token)
@@ -83,8 +83,8 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	client := *cl
 
 	if args[0] == "list-apps" {
-		uri := []string{"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/list_repo_apps"}
-		resp, err := httpCall("GET", strings.Join(uri, ""), token)
+		uri := []string{"https://", client.app.Routes[0].Host, ".", client.app.Routes[0].Domain.Name, "/list_repo_apps"}
+		resp, err := httpCall("GET", strings.Join(uri, ""), client.token)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -138,7 +138,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType{
 			Major: 6,
 			Minor: 1,
-			Build: 2,
+			Build: 3,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,
