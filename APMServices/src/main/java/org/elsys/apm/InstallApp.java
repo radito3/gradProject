@@ -5,6 +5,7 @@ import org.cloudfoundry.client.lib.UploadStatusCallback;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.modeshape.common.text.Inflector;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -29,7 +30,10 @@ public class InstallApp {
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public Response getInstallResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
+    public Response getInstallResult(@HeaderParam("access-token") String token,
+                                     @PathParam("appName") String appName,
+                                     @DefaultValue("1000") @QueryParam("mem") int memory,
+                                     @DefaultValue("1000") @QueryParam("disc") int disc) {
         client = new CloudClient(orgName, spaceName, token);
         client.login();
 
@@ -42,26 +46,18 @@ public class InstallApp {
             }
 
             String appLang = String.valueOf(app.get("language"));
-            if (appLang.equals("null")) {
-                throw new IllegalStateException("Multi-language support not yet implemented");
-            }
-
             String buildpackUrl = getLangBuildpack(String.valueOf(appLang));
             if (buildpackUrl.equals("Unsupported language")) {
                 throw new IllegalArgumentException("Unsupported language");
             }
 
-            JSONArray files = (JSONArray) app.get("files");
-            for (Object file : files) {
-                String fileName = String.valueOf(file);
-                staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
+            JSONValue file = (JSONValue) app.get("file");
+            String fileName = String.valueOf(file);
+            staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
 
-                installApp(staticAppUrl.toString(), appName, fileName, buildpackUrl);
-            }
+            installApp(staticAppUrl.toString(), appName, fileName, buildpackUrl, memory, disc);
         } catch (ClassNotFoundException e) {
             return Response.status(404).entity(e.getMessage()).build();
-        } catch (IllegalStateException e) {
-            return Response.status(501).entity(e.getMessage()).build();
         } catch (IllegalArgumentException e) {
             return Response.status(415).entity(e.getMessage()).build();
         } finally {
@@ -71,40 +67,29 @@ public class InstallApp {
         return Response.status(201).entity("App installed successfully").build();
     }
 
-    private void installApp(String... args) {
+    private void installApp(String uri, String appName, String fileName, String buildpackUrl,
+                            int memory, int disc) {
         try {
-            URL url = new URL(args[0]);
+            URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
-            pushApplications(con, args[1], args[2], args[3]);
+            pushApplications(con, appName, fileName, buildpackUrl, memory, disc);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void pushApplications(HttpsURLConnection con, String appName, String fileName, String buildpackUrl)
-            throws IOException {
+    private void pushApplications(HttpsURLConnection con, String appName, String fileName,
+                                  String buildpackUrl, int memory, int disc) throws IOException {
         try (InputStream in = con.getInputStream()) {
-            String execFileName = fileName.split("[^a-zA-Z0-9]")[0];
-            String repoAppName = "";
-            String nameToUpload;
+            String name = fileName.split("[^-a-zA-Z0-9]")[0].toLowerCase();
 
-            if (appName.toLowerCase().equals(execFileName.toLowerCase())) {
-                nameToUpload = appName;
-            } else {
-                nameToUpload = execFileName;
-                repoAppName = appName;
-            }
-
-            String name = Inflector.getInstance().lowerCamelCase(nameToUpload);
-
-            client.createApp(name, new Staging(null, buildpackUrl), 1000, 1000,
+            client.createApp(name, new Staging(null, buildpackUrl), disc, memory,
                     Collections.singletonList("https://" + appName.toLowerCase() + ".cfapps.io"));
 
             client.uploadApp(name, fileName, in, UploadStatusCallback.NONE);
 
-            client.updateAppEnv(appName, repoAppName.isEmpty() ? ImmutableMap.of("appVersion", "1.0.0") :
-                    ImmutableMap.of("appVersion", "1.0.0", "repoAppName", repoAppName));
+            client.updateAppEnv(appName, ImmutableMap.of("pkgVersion", "1.0.0"));
         }
     }
 

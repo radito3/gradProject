@@ -11,6 +11,6 @@ public class Application extends javax.ws.rs.core.Application {
     @Override
     public Set<Class<?>> getClasses() {
         return Sets.newHashSet(ListApps.class, CloudClient.class, Buildpacks.class,
-                InstallApp.class, DeleteApp.class, UpdateApp.class, ThreadHolder.class, DescriptorWork.class);
+                InstallApp.class, DeleteApp.class, UpdateApp.class, DescriptorWork.class);
     }
 }

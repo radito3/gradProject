@@ -28,7 +28,7 @@ public class DeleteApp {
 
         } catch (CloudFoundryException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                return Response.status(404).entity("App " + appName + " not found").build();
+                return Response.status(404).entity("App " + appName + " does not exist").build();
             } else {
                 return Response.status(e.getStatusCode().value()).entity(e.getMessage()).build();
             }
