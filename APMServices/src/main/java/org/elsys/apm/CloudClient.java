@@ -36,13 +36,11 @@ public class CloudClient {
         client.login();
     }
 
-    void uploadApp(String appName, String fileName, InputStream inputStream,
-                   UploadStatusCallback callback) throws IOException {
-        client.uploadApplication(appName, fileName, inputStream, callback);
+    void uploadApp(String appName, String fileName, InputStream inputStream) throws IOException {
+        client.uploadApplication(appName, fileName, inputStream, UploadStatusCallback.NONE);
     }
 
-    void createApp(String appName, Staging staging, Integer disk, Integer memory,
-                   List<String> uris) {
+    void createApp(String appName, Staging staging, Integer disk, Integer memory, List<String> uris) {
         client.createApplication(appName, staging, disk, memory, uris, null);
     }
 

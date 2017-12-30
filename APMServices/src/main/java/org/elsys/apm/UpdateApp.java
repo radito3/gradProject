@@ -98,7 +98,7 @@ public class UpdateApp {
     private void pushApps(HttpsURLConnection con, String... args) throws IOException {
         try (InputStream in = con.getInputStream()) {
 
-            client.uploadApp(args[0], args[1], in, UploadStatusCallback.NONE);
+            client.uploadApp(args[0], args[1], in);
 
             client.updateAppEnv(args[0], ImmutableMap.of("pkgVersion", args[2]));
         }

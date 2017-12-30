@@ -88,7 +88,7 @@ public class InstallApp {
             client.createApp(name, new Staging(null, buildpackUrl), disc, memory,
                     Collections.singletonList("https://" + appName.toLowerCase() + ".cfapps.io"));
 
-            client.uploadApp(name, fileName, in, UploadStatusCallback.NONE);
+            client.uploadApp(name, fileName, in);
 
             client.updateAppEnv(appName, ImmutableMap.of("pkgVersion", version));
         } catch (IOException e) {
