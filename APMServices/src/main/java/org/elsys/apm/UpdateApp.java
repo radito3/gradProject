@@ -100,7 +100,7 @@ public class UpdateApp {
 
             client.uploadApp(args[0], args[1], in, UploadStatusCallback.NONE);
 
-            client.updateAppEnv(args[0], ImmutableMap.of("pkgVersion", args[2])); //should test if this erases the repoAppName
+            client.updateAppEnv(args[0], ImmutableMap.of("pkgVersion", args[2]));
         }
     }
 

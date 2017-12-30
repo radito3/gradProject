@@ -3,7 +3,7 @@ package org.elsys.apm;
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.cloudfoundry.client.lib.UploadStatusCallback;
 import org.cloudfoundry.client.lib.domain.Staging;
-import org.elsys.apm.dependancy.DependencyHandlerImpl;
+import org.elsys.apm.dependancy.DependencyHandler;
 import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -60,28 +60,28 @@ public class InstallApp {
         return Response.status(201).entity("App installed successfully").build();
     }
 
-    private void installApp(String uri, String appName, String fileName, JSONObject app, int memory, int disc) {
+    public void installApp(String uri, String appName, String fileName, JSONObject app, int memory, int disc) {
         try {
             URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
+            String version = String.valueOf(app.get("pkgVersion"));
             String appLang = String.valueOf(app.get("language"));
             String buildpackUrl = getLangBuildpack(String.valueOf(appLang));
             if (buildpackUrl.equals("Unsupported language")) {
                 throw new IllegalArgumentException("Unsupported language");
             }
 
-            DependencyHandlerImpl.handle((JSONArray) app.get("dependencies"), con, appName, fileName,
-                    buildpackUrl, memory, disc);
+            DependencyHandler.handle((JSONArray) app.get("dependencies"), memory, disc);
 
-            pushApps(con, appName, fileName, buildpackUrl, memory, disc);
+            pushApps(con, appName, fileName, buildpackUrl, version, memory, disc);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void pushApps(HttpsURLConnection con, String appName, String fileName,
-                         String buildpackUrl, int memory, int disc) {
+    private void pushApps(HttpsURLConnection con, String appName, String fileName,
+                         String buildpackUrl, String version, int memory, int disc) {
         try (InputStream in = con.getInputStream()) {
             String name = fileName.split("[^-a-zA-Z0-9]")[0].toLowerCase();
 
@@ -90,7 +90,7 @@ public class InstallApp {
 
             client.uploadApp(name, fileName, in, UploadStatusCallback.NONE);
 
-            client.updateAppEnv(appName, ImmutableMap.of("pkgVersion", "1.0.0"));
+            client.updateAppEnv(appName, ImmutableMap.of("pkgVersion", version));
         } catch (IOException e) {
             e.printStackTrace();
         }
