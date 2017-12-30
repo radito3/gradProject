@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-class DescriptorWork {
+public class DescriptorWork {
 
     static String DESCRIPTOR_URL = System.getenv("staticAppUrl").concat("/descriptor.json");
 

@@ -16,7 +16,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-class CloudClient {
+public class CloudClient {
 
     private static final String TARGET = System.getenv("targetUrl");
 

@@ -3,10 +3,10 @@ package org.elsys.apm;
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.cloudfoundry.client.lib.UploadStatusCallback;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.elsys.apm.dependancy.DependencyHandlerImpl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.modeshape.common.text.Inflector;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.*;
@@ -72,6 +72,8 @@ public class InstallApp {
         try {
             URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+
+            DependencyHandlerImpl.handle(client, new JSONArray());
 
             pushApplications(con, appName, fileName, buildpackUrl, memory, disc);
         } catch (IOException e) {

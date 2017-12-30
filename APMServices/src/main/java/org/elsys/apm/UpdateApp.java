@@ -4,10 +4,9 @@ import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.UploadStatusCallback;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.springframework.http.HttpStatus;
-import org.modeshape.common.text.Inflector;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.*;
@@ -41,7 +40,7 @@ public class UpdateApp {
             CloudApplication app = client.getApp(appName);
             JSONObject descr = DescriptorWork.getDescriptor(DescriptorWork.DESCRIPTOR_URL);
 
-            JSONObject appJson = (JSONObject) descr.get(Inflector.getInstance().upperCamelCase(appName));
+            JSONObject appJson = (JSONObject) descr.get(appName);
             if (appJson == null) {
                 throw new IllegalArgumentException("App " + appName + " no longer supported");
             }
@@ -49,15 +48,13 @@ public class UpdateApp {
             List<List<Integer>> versions = getVersions(app, appJson);
 
             if (checkVer(versions.get(0), versions.get(1), 0)) {
-                JSONArray files = (JSONArray) appJson.get("files");
+                JSONValue file = (JSONValue) appJson.get("file");
                 StringBuilder downloadUrl = new StringBuilder(DescriptorWork.DESCRIPTOR_URL);
 
-                for (Object file : files) {
-                    String fileName = fileNameToDownload(app, String.valueOf(file));
-                    downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), fileName);
+                String fileName = String.valueOf(file);
+                downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), fileName);
 
-                    uploadApp(appJson, downloadUrl.toString(), appName, fileName);
-                }
+                uploadApp(appJson, downloadUrl.toString(), appName, fileName);
             } else {
                 return Response.status(200).entity("App up-to-date").build();
             }
@@ -86,17 +83,12 @@ public class UpdateApp {
         }
     }
 
-    private String fileNameToDownload(CloudApplication app, String fileName) {
-        String repoAppName = app.getEnvAsMap().get("repoAppName");
-        return repoAppName == null ? fileName : repoAppName;
-    }
-
     private void uploadApp(JSONObject appJson, String... args) {
         try {
             URL url = new URL(args[0]);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
-            pushApps(con, args[1], args[2], String.valueOf(appJson.get("appVersion")));
+            pushApps(con, args[1], args[2], String.valueOf(appJson.get("pkgVersion")));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -106,19 +98,19 @@ public class UpdateApp {
         try (InputStream in = con.getInputStream()) {
             String appName = args[0];
             String fileName = args[1];
-            String execFileName = fileName.split("[^a-zA-Z0-9]")[0];
+            String execFileName = fileName.split("[^-a-zA-Z0-9]")[0];
 
             String nameToUpload = appName.toLowerCase().equals(execFileName.toLowerCase()) ? appName : execFileName;
 
             client.uploadApp(nameToUpload, fileName, in, UploadStatusCallback.NONE);
 
-            client.updateAppEnv(nameToUpload, ImmutableMap.of("appVersion", args[2])); //should test if this erases the repoAppName
+            client.updateAppEnv(nameToUpload, ImmutableMap.of("pkgVersion", args[2])); //should test if this erases the repoAppName
         }
     }
 
     private List<List<Integer>> getVersions(CloudApplication app, JSONObject appJson) {
-        String repoVer = String.valueOf(appJson.get("appVersion"));
-        String currentVer = app.getEnvAsMap().get("appVersion");
+        String repoVer = String.valueOf(appJson.get("pkgVersion"));
+        String currentVer = app.getEnvAsMap().get("pkgVersion");
 
         List<Integer> repoVersions = new ArrayList<>();
         List<Integer> currentVersions = new ArrayList<>();
