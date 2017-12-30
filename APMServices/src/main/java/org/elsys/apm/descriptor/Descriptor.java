@@ -1,4 +1,4 @@
-package org.elsys.apm;
+package org.elsys.apm.descriptor;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -11,19 +11,34 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-public class DescriptorWork {
+public final class Descriptor {
 
-    static String DESCRIPTOR_URL = System.getenv("staticAppUrl").concat("/descriptor.json");
+    private static volatile Descriptor instance;
 
-    static JSONObject getDescriptor(String uri) {
+    private static JSONObject descriptor;
+
+    public static final String DESCRIPTOR_URL = System.getenv("staticAppUrl").concat("/descriptor.json");
+
+    private Descriptor() {
         HttpsURLConnection con = null;
         try {
-            URL url = new URL(uri);
+            URL url = new URL(DESCRIPTOR_URL);
             con = (HttpsURLConnection) url.openConnection();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return fnc(con);
+        descriptor = fnc(con);
+    }
+
+    public static JSONObject getDescriptor() {
+        if (instance == null) {
+            synchronized (Descriptor.class) {
+                if (instance == null) {
+                    instance = new Descriptor();
+                }
+            }
+        }
+        return descriptor;
     }
 
     private static JSONObject fnc(HttpsURLConnection connection) {

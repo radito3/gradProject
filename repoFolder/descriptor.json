@@ -1,7 +1,7 @@
 {
     "test-app": {
         "file": "TestAppServiceOne-1.0-SNAPSHOT.war",
-        "dependancies": [
+        "dependencies": [
             "test-app-two"
         ],
         "pkgVersion": "1.0.0",
@@ -9,19 +9,19 @@
     },
     "test-app-two": {
         "file": "TestAppServiceTwo-1.0-SNAPSHOT.war",
-        "dependancies": [],
+        "dependencies": [],
         "pkgVersion": "1.0.0",
         "language": "java"
     },
     "todo-list": {
         "file": "TodoList-1.0-SNAPSHOT.war",
-        "dependancies": [],
+        "dependencies": [],
         "pkgVersion": "1.1.0",
         "language": "java"
     },
     "ruby-app": {
         "file": "rubyTestApp.rb",
-        "dependancies": [],
+        "dependencies": [],
         "pkgVersion": "1.0.0",
         "language": "ruby"
     }

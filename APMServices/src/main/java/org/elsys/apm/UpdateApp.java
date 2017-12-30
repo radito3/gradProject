@@ -4,6 +4,7 @@ import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.UploadStatusCallback;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.springframework.http.HttpStatus;
@@ -38,7 +39,7 @@ public class UpdateApp {
 
         try {
             CloudApplication app = client.getApp(appName);
-            JSONObject descr = DescriptorWork.getDescriptor(DescriptorWork.DESCRIPTOR_URL);
+            JSONObject descr = Descriptor.getDescriptor();
 
             JSONObject appJson = (JSONObject) descr.get(appName);
             if (appJson == null) {
@@ -49,7 +50,7 @@ public class UpdateApp {
 
             if (checkVer(versions.get(0), versions.get(1), 0)) {
                 JSONValue file = (JSONValue) appJson.get("file");
-                StringBuilder downloadUrl = new StringBuilder(DescriptorWork.DESCRIPTOR_URL);
+                StringBuilder downloadUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
 
                 String fileName = String.valueOf(file);
                 downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), fileName);
@@ -96,15 +97,10 @@ public class UpdateApp {
 
     private void pushApps(HttpsURLConnection con, String... args) throws IOException {
         try (InputStream in = con.getInputStream()) {
-            String appName = args[0];
-            String fileName = args[1];
-            String execFileName = fileName.split("[^-a-zA-Z0-9]")[0];
 
-            String nameToUpload = appName.toLowerCase().equals(execFileName.toLowerCase()) ? appName : execFileName;
+            client.uploadApp(args[0], args[1], in, UploadStatusCallback.NONE);
 
-            client.uploadApp(nameToUpload, fileName, in, UploadStatusCallback.NONE);
-
-            client.updateAppEnv(nameToUpload, ImmutableMap.of("pkgVersion", args[2])); //should test if this erases the repoAppName
+            client.updateAppEnv(args[0], ImmutableMap.of("pkgVersion", args[2])); //should test if this erases the repoAppName
         }
     }
 

@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-final class ThreadHolder {
+public final class ThreadHolder {
 
     private static volatile ThreadHolder instance;
 

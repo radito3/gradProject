@@ -4,9 +4,9 @@ import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.cloudfoundry.client.lib.UploadStatusCallback;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.elsys.apm.dependancy.DependencyHandlerImpl;
+import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.*;
@@ -37,25 +37,18 @@ public class InstallApp {
         client = new CloudClient(orgName, spaceName, token);
         client.login();
 
-        StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.DESCRIPTOR_URL);
+        StringBuilder staticAppUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
         try {
-            JSONObject descr = DescriptorWork.getDescriptor(staticAppUrl.toString());
+            JSONObject descr = Descriptor.getDescriptor();
             JSONObject app = (JSONObject) descr.get(appName);
             if (app == null) {
                 throw new ClassNotFoundException("App " + appName + " not found");
             }
 
-            String appLang = String.valueOf(app.get("language"));
-            String buildpackUrl = getLangBuildpack(String.valueOf(appLang));
-            if (buildpackUrl.equals("Unsupported language")) {
-                throw new IllegalArgumentException("Unsupported language");
-            }
-
-            JSONValue file = (JSONValue) app.get("file");
-            String fileName = String.valueOf(file);
+            String fileName = String.valueOf(app.get("file"));
             staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
 
-            installApp(staticAppUrl.toString(), appName, fileName, buildpackUrl, memory, disc);
+            installApp(staticAppUrl.toString(), appName, fileName, app, memory, disc);
         } catch (ClassNotFoundException e) {
             return Response.status(404).entity(e.getMessage()).build();
         } catch (IllegalArgumentException e) {
@@ -67,22 +60,28 @@ public class InstallApp {
         return Response.status(201).entity("App installed successfully").build();
     }
 
-    private void installApp(String uri, String appName, String fileName, String buildpackUrl,
-                            int memory, int disc) {
+    private void installApp(String uri, String appName, String fileName, JSONObject app, int memory, int disc) {
         try {
             URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
-            DependencyHandlerImpl.handle(client, new JSONArray());
+            String appLang = String.valueOf(app.get("language"));
+            String buildpackUrl = getLangBuildpack(String.valueOf(appLang));
+            if (buildpackUrl.equals("Unsupported language")) {
+                throw new IllegalArgumentException("Unsupported language");
+            }
 
-            pushApplications(con, appName, fileName, buildpackUrl, memory, disc);
+            DependencyHandlerImpl.handle((JSONArray) app.get("dependencies"), con, appName, fileName,
+                    buildpackUrl, memory, disc);
+
+            pushApps(con, appName, fileName, buildpackUrl, memory, disc);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void pushApplications(HttpsURLConnection con, String appName, String fileName,
-                                  String buildpackUrl, int memory, int disc) throws IOException {
+    public void pushApps(HttpsURLConnection con, String appName, String fileName,
+                         String buildpackUrl, int memory, int disc) {
         try (InputStream in = con.getInputStream()) {
             String name = fileName.split("[^-a-zA-Z0-9]")[0].toLowerCase();
 
@@ -92,6 +91,8 @@ public class InstallApp {
             client.uploadApp(name, fileName, in, UploadStatusCallback.NONE);
 
             client.updateAppEnv(appName, ImmutableMap.of("pkgVersion", "1.0.0"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
