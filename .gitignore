@@ -3,3 +3,4 @@ target/
 *.ear
 *.class
 .idea/
+*.iml
