@@ -23,12 +23,12 @@ func httpCall(method string, uri string, token string) (string, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(method, uri, nil)
 	if err != nil {
-		return "", fmt.Errorf("%s", err)
+		return "", err
 	}
 	req.Header.Set("access-token", token)
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("%s", err)
+		return "", err
 	}
 	defer resp.Body.Close()
 
@@ -54,24 +54,28 @@ func (c *client) manageApmCalls(args ...string) (string, error) {
 }
 
 func getClient(con plugin.CliConnection) (*client, error) {
+	var (
+		c   client
+		err error
+	)
 	app, err := con.GetApp("apmServices") // may change the name getting
 	if err != nil {
-		return nil, fmt.Errorf("%s", err)
+		return nil, err
 	}
 	org, err := con.GetCurrentOrg()
 	if err != nil {
-		return nil, fmt.Errorf("%s", err)
+		return nil, err
 	}
 	space, err := con.GetCurrentSpace()
 	if err != nil {
-		return nil, fmt.Errorf("%s", err)
+		return nil, err
 	}
 	token, err := con.AccessToken()
 	if err != nil {
-		return nil, fmt.Errorf("%s", err)
+		return nil, err
 	}
-	c := &client{org: org.Name, space: space.Name, token: token, app: app}
-	return c, nil
+	c = client{org: org.Name, space: space.Name, token: token, app: app}
+	return &c, nil
 }
 
 func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
