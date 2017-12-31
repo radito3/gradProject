@@ -1,15 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	//"flag"
 
 	"code.cloudfoundry.org/cli/plugin"
 	"code.cloudfoundry.org/cli/plugin/models"
 )
 
+//ApmPlugin ...
 type ApmPlugin struct{}
 
 type client struct {
@@ -34,21 +37,24 @@ func httpCall(method string, uri string, token string) (string, error) {
 
 	bs, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("Sevice error on Read: %s", err)
+		return "", err
 	}
 	return string(bs), nil
 }
 
-func (c *client) manageApmCalls(args ...string) (string, error) {
-	var (
-		apmCall  = args[0]
-		httpVerb = args[1]
-		appName  = args[2]
-	)
-	uri := fmt.Sprintf("https://%s.%s/%s/%s/%s/%s", c.app.Routes[0].Host, c.app.Routes[0].Domain.Name, c.org, c.space, apmCall, appName)
+func (c *client) manageApmCalls(apmCall string, httpVerb string, appName string, query ...string) (string, error) {
+	uri := "https://" + c.app.Routes[0].Host + "." + c.app.Routes[0].Domain.Name + "/" +
+		c.org + "/" + c.space + "/" + apmCall + "/" + appName
+
+	if len(query) != 0 { // not the prettiest way but it gets the job done
+		uri += "?" + query[0] + "=" + query[1]
+	} else if len(query) > 1 {
+		uri += "?" + query[0] + "=" + query[1] + "&" + query[2] + "=" + query[3]
+	}
+
 	resp, err := httpCall(httpVerb, uri, c.token)
 	if err != nil {
-		return "", fmt.Errorf("%s", err)
+		return "", err
 	}
 	return resp, nil
 }
@@ -74,6 +80,7 @@ func getClient(con plugin.CliConnection) (*client, error) {
 	return &c, nil
 }
 
+//Run ...
 func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	cl, err := getClient(cliConnection)
 	if err != nil {
@@ -132,13 +139,14 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	}
 }
 
+//GetMetadata ...
 func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 	return plugin.PluginMetadata{
 		Name: "apmPlugin",
 		Version: plugin.VersionType{
 			Major: 6,
-			Minor: 1,
-			Build: 3,
+			Minor: 2,
+			Build: 0,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,
@@ -180,4 +188,11 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 
 func main() {
 	plugin.Start(new(ApmPlugin))
+	var str bytes.Buffer
+
+	for i := 0; i < 10; i++ {
+		str.WriteString("a")
+	}
+
+	fmt.Println(str.String())
 }

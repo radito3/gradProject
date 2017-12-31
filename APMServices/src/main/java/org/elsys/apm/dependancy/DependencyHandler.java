@@ -7,19 +7,18 @@ import org.json.simple.JSONObject;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.List;
 
 public class DependencyHandler {
 
-    private static List<Dependency> dependencies = new ArrayList<>();
+    private static ArrayList<Dependency> dependencies = new ArrayList<>();
 
-    static public void handle(JSONArray dependencies1, int memory, int disc) {
+    public static void handle(JSONArray dependencies1, int memory, int disc) {
 
         if (dependencies1.isEmpty()) return; // need to test it to make sure this works correctly
 
         Descriptor descr = Descriptor.getDescriptor();
 
-        dependencies1.forEach(d -> dependencies.add(new Dependency(String.valueOf(d))));
+        dependencies1.forEach(obj -> dependencies.add(new Dependency(String.valueOf(obj))));
 
         Class<?>[] parameters = { String.class, String.class, String.class, JSONObject.class, int.class, int.class };
         try {

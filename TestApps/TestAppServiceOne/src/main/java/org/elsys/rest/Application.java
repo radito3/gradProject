@@ -9,7 +9,7 @@ public class Application extends javax.ws.rs.core.Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        HashSet h = new HashSet<Class<?>>();
+        HashSet<Class<?>> h = new HashSet<>();
         h.add( RestServiceOne.class );
         return h;
     }

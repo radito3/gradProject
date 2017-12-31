@@ -46,7 +46,7 @@ public final class Descriptor {
         return descriptor.get(key);
     }
 
-    public Set keySet() {
+    public Set<?> keySet() {
         return descriptor.keySet();
     }
 
