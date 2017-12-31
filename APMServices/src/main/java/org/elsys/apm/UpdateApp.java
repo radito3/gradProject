@@ -2,12 +2,10 @@ package org.elsys.apm;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.lib.UploadStatusCallback;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.springframework.http.HttpStatus;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.*;
@@ -39,7 +37,7 @@ public class UpdateApp {
 
         try {
             CloudApplication app = client.getApp(appName);
-            JSONObject descr = Descriptor.getDescriptor();
+            Descriptor descr = Descriptor.getDescriptor();
 
             JSONObject appJson = (JSONObject) descr.get(appName);
             if (appJson == null) {
@@ -59,12 +57,9 @@ public class UpdateApp {
             } else {
                 return Response.status(200).entity("App up-to-date").build();
             }
+
         } catch (CloudFoundryException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                return Response.status(404).entity("App " + appName + " not found").build();
-            } else {
-                return Response.status(e.getStatusCode().value()).entity(e.getMessage()).build();
-            }
+            return Response.status(404).entity("App " + appName + " not found").build();
         } catch (IllegalArgumentException e) {
             return Response.status(410).entity(e.getMessage()).build();
         } finally {

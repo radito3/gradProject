@@ -1,7 +1,6 @@
 package org.elsys.apm;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
-import org.cloudfoundry.client.lib.UploadStatusCallback;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.elsys.apm.dependancy.DependencyHandler;
 import org.elsys.apm.descriptor.Descriptor;
@@ -39,7 +38,7 @@ public class InstallApp {
 
         StringBuilder staticAppUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
         try {
-            JSONObject descr = Descriptor.getDescriptor();
+            Descriptor descr = Descriptor.getDescriptor();
             JSONObject app = (JSONObject) descr.get(appName);
             if (app == null) {
                 throw new ClassNotFoundException("App " + appName + " not found");

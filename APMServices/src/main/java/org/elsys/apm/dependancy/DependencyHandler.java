@@ -17,7 +17,7 @@ public class DependencyHandler {
 
         if (dependencies1.isEmpty()) return; // need to test it to make sure this works correctly
 
-        JSONObject descr = Descriptor.getDescriptor();
+        Descriptor descr = Descriptor.getDescriptor();
 
         dependencies1.forEach(d -> dependencies.add(new Dependency(String.valueOf(d))));
 

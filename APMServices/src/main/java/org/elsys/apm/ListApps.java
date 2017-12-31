@@ -1,7 +1,6 @@
 package org.elsys.apm;
 
 import org.elsys.apm.descriptor.Descriptor;
-import org.json.simple.JSONObject;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -17,7 +16,7 @@ public class ListApps {
     public Response getListApps() {
         StringBuilder result = new StringBuilder();
 
-        JSONObject descr = Descriptor.getDescriptor();
+        Descriptor descr = Descriptor.getDescriptor();
         descr.keySet().stream().forEach(key -> result.append(key).append('\n'));
 
         return Response.status(200).entity(result.toString()).build();

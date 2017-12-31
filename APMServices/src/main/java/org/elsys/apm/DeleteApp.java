@@ -1,7 +1,6 @@
 package org.elsys.apm;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.springframework.http.HttpStatus;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -27,11 +26,7 @@ public class DeleteApp {
             client.deleteApp(appName);
 
         } catch (CloudFoundryException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                return Response.status(404).entity("App " + appName + " does not exist").build();
-            } else {
-                return Response.status(e.getStatusCode().value()).entity(e.getMessage()).build();
-            }
+            return Response.status(404).entity("App " + appName + " does not exist").build();
         } finally {
             client.logout();
         }

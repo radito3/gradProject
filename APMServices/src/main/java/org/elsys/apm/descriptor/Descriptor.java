@@ -10,12 +10,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Set;
 
 public final class Descriptor {
 
     private static volatile Descriptor instance;
 
-    private static JSONObject descriptor;
+    private JSONObject descriptor;
 
     public static final String DESCRIPTOR_URL = System.getenv("staticAppUrl").concat("/descriptor.json");
 
@@ -30,7 +31,7 @@ public final class Descriptor {
         descriptor = fnc(con);
     }
 
-    public static JSONObject getDescriptor() {
+    public static Descriptor getDescriptor() {
         if (instance == null) {
             synchronized (Descriptor.class) {
                 if (instance == null) {
@@ -38,10 +39,18 @@ public final class Descriptor {
                 }
             }
         }
-        return descriptor;
+        return instance;
     }
 
-    private static JSONObject fnc(HttpsURLConnection connection) {
+    public Object get(Object key) {
+        return descriptor.get(key);
+    }
+
+    public Set keySet() {
+        return descriptor.keySet();
+    }
+
+    private JSONObject fnc(HttpsURLConnection connection) {
         try (InputStream in = connection.getInputStream()) {
             return fnc1(in);
         } catch (IOException e) {
@@ -50,7 +59,7 @@ public final class Descriptor {
         return null;
     }
 
-    private static JSONObject fnc1(InputStream inputStream) {
+    private JSONObject fnc1(InputStream inputStream) {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
 
             StringBuilder json = new StringBuilder();
