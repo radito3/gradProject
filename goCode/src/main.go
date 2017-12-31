@@ -54,10 +54,6 @@ func (c *client) manageApmCalls(args ...string) (string, error) {
 }
 
 func getClient(con plugin.CliConnection) (*client, error) {
-	var (
-		c   client
-		err error
-	)
 	app, err := con.GetApp("apmServices") // may change the name getting
 	if err != nil {
 		return nil, err
@@ -74,7 +70,7 @@ func getClient(con plugin.CliConnection) (*client, error) {
 	if err != nil {
 		return nil, err
 	}
-	c = client{org: org.Name, space: space.Name, token: token, app: app}
+	c := client{org: org.Name, space: space.Name, token: token, app: app}
 	return &c, nil
 }
 
