@@ -2,37 +2,39 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-	"code.cloudfoundry.org/cli/plugin"
 	"io/ioutil"
-	"errors"
+	"net/http"
 	"strings"
+
+	"code.cloudfoundry.org/cli/plugin"
 )
 
-type TodoListPlugin struct {}
+//TodoListPlugin ...
+type TodoListPlugin struct{}
 
 func getResponse(uri string) (string, error) {
 	resp, err := http.Get(uri)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("Sevice error on Get: %s", err))
+		return "", err
 	}
 	defer resp.Body.Close()
 
-	bs, readErr := ioutil.ReadAll(resp.Body)
-	if readErr != nil {
-		return "", errors.New(fmt.Sprintf("Sevice error on Read: %s", readErr))
+	bs, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
 	}
 	return string(bs), nil
 }
 
+//Run ...
 func (c *TodoListPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	if args[0] == "todo-list" {
-		app, err := cliConnection.GetApp("todoList")
+		app, err := cliConnection.GetApp("todo-list-elsys")
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-	
+
 		var uri = []string{"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/TodoList"}
 		resp, err := getResponse(strings.Join(uri, ""))
 		if err != nil {
@@ -43,20 +45,21 @@ func (c *TodoListPlugin) Run(cliConnection plugin.CliConnection, args []string) 
 	}
 }
 
+//GetMetadata ...
 func (c *TodoListPlugin) GetMetadata() plugin.PluginMetadata {
-	return plugin.PluginMetadata {
+	return plugin.PluginMetadata{
 		Name: "todoListPlugin",
-		Version: plugin.VersionType {
+		Version: plugin.VersionType{
 			Major: 1,
 			Minor: 0,
 			Build: 0,
 		},
-		MinCliVersion: plugin.VersionType {
+		MinCliVersion: plugin.VersionType{
 			Major: 6,
 			Minor: 7,
 			Build: 0,
 		},
-		Commands: []plugin.Command {
+		Commands: []plugin.Command{
 			{
 				Name:     "todo-list",
 				HelpText: "TodoList Application Plugin",
