@@ -48,7 +48,7 @@ public class CloudClient {
         client.logout();
     }
 
-    CloudApplication getApp(String appName) throws CloudFoundryException {
+    public CloudApplication getApp(String appName) throws CloudFoundryException {
         return client.getApplication(appName);
     }
 

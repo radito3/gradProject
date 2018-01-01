@@ -1,5 +1,7 @@
 package org.elsys.apm.dependancy;
 
+import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.elsys.apm.CloudClient;
 import org.elsys.apm.InstallApp;
 import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.JSONArray;
@@ -7,16 +9,17 @@ import org.json.simple.JSONObject;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.MissingResourceException;
 
 public class DependencyHandler {
 
     private static ArrayList<Dependency> dependencies = new ArrayList<>();
 
+    private static Descriptor descr = Descriptor.getDescriptor();
+
     public static void handle(JSONArray dependencies1, int memory, int disc) {
 
         if (dependencies1.isEmpty()) return; // need to test it to make sure this works correctly
-
-        Descriptor descr = Descriptor.getDescriptor();
 
         dependencies1.forEach(obj -> dependencies.add(new Dependency(String.valueOf(obj))));
 
@@ -35,5 +38,19 @@ public class DependencyHandler {
                 d.handle(push, url.toString(), appName, fileName, app, memory, disc);
             });
         } catch (NoSuchMethodException ignored) {}
+    }
+
+    public static void checkDependencies(String appName, CloudClient client) throws MissingResourceException {
+        JSONObject app = (JSONObject) descr.get(appName);
+
+        JSONArray dpnds = (JSONArray) app.get("dependencies");
+
+        dpnds.forEach(d -> {
+            try {
+                client.getApp(appName);
+            } catch (CloudFoundryException e) {
+                throw new MissingResourceException("Missing dependencies", "", "");
+            }
+        });
     }
 }

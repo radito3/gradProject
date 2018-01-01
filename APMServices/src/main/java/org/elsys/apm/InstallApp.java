@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
+import java.util.MissingResourceException;
 
 @Path("/{org}/{space}/install/{appName}")
 public class InstallApp {
@@ -48,10 +49,14 @@ public class InstallApp {
             staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
 
             installApp(staticAppUrl.toString(), appName, fileName, app, memory, disc);
+
+            DependencyHandler.checkDependencies(appName, client);
         } catch (ClassNotFoundException e) {
             return Response.status(404).entity(e.getMessage()).build();
         } catch (IllegalArgumentException e) {
             return Response.status(415).entity(e.getMessage()).build();
+        } catch (MissingResourceException e) {
+            return Response.status(424).entity(e.getMessage()).build();
         } finally {
             client.logout();
         }
