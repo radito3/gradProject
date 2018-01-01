@@ -35,7 +35,7 @@ func (c *TestAppPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 			return
 		}
 
-		uri := []string{"https://cf-", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/Test"}
+		uri := []string{"https://", app.Routes[0].Host, ".", app.Routes[0].Domain.Name, "/Test"}
 		resp, err := getResponse(strings.Join(uri, ""))
 		if err != nil {
 			fmt.Println(err)
