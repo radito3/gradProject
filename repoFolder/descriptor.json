@@ -10,7 +10,7 @@
     "test-app-two": {
         "file": "TestAppServiceTwo-1.0-SNAPSHOT.war",
         "dependencies": [],
-        "pkgVersion": "1.0.0",
+        "pkgVersion": "1.1.0",
         "language": "java"
     },
     "todo-list-elsys": {

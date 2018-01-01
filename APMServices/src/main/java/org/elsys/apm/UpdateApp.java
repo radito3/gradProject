@@ -5,7 +5,6 @@ import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.*;
@@ -47,13 +46,12 @@ public class UpdateApp {
             List<List<Integer>> versions = getVersions(app, appJson);
 
             if (checkVer(versions.get(0), versions.get(1), 0)) {
-                JSONValue file = (JSONValue) appJson.get("file");
+                String file = String.valueOf(appJson.get("file"));
                 StringBuilder downloadUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
 
-                String fileName = String.valueOf(file);
-                downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), fileName);
+                downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), file);
 
-                uploadApp(appJson, downloadUrl.toString(), appName, fileName);
+                uploadApp(appJson, downloadUrl.toString(), appName, file);
             } else {
                 return Response.status(200).entity("App up-to-date").build();
             }

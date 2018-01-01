@@ -15,6 +15,6 @@ public class RestServiceTwo {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String getResponse() {
-        return String.format("Called %d times", counter.getAndIncrement());
+        return String.format("Called %d times from updated version", counter.getAndIncrement());
     }
 }
