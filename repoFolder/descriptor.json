@@ -1,5 +1,5 @@
 {
-    "test-app": {
+    "test-app-one": {
         "file": "TestAppServiceOne-1.0-SNAPSHOT.war",
         "dependencies": [
             "test-app-two"
@@ -13,7 +13,7 @@
         "pkgVersion": "1.0.0",
         "language": "java"
     },
-    "todo-list": {
+    "todo-list-elsys": {
         "file": "TodoList-1.0-SNAPSHOT.war",
         "dependencies": [],
         "pkgVersion": "1.1.0",

@@ -17,7 +17,7 @@ public class DependencyHandler {
 
     private static Descriptor descr = Descriptor.getDescriptor();
 
-    public static void handle(JSONArray dependencies1, int memory, int disc) {
+    public static void handle(JSONArray dependencies1, InstallApp instance, int memory, int disc) {
 
         if (dependencies1.isEmpty()) return; // need to test it to make sure this works correctly
 
@@ -35,7 +35,7 @@ public class DependencyHandler {
                 String fileName = d.getFileName();
                 JSONObject app = (JSONObject) descr.get(d.getName());
 
-                d.handle(push, url.toString(), appName, fileName, app, memory, disc);
+                d.handle(push, instance, url.toString(), appName, fileName, app, memory, disc);
             });
         } catch (NoSuchMethodException ignored) {}
     }
@@ -47,6 +47,7 @@ public class DependencyHandler {
 
         dpnds.forEach(d -> {
             try {
+                System.err.println("supposedly missing app : " + appName);
                 client.getApp(appName);
             } catch (CloudFoundryException e) {
                 throw new MissingResourceException("Missing dependencies", "", "");

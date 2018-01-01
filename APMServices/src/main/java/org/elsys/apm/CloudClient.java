@@ -56,7 +56,7 @@ public class CloudClient {
         client.deleteApplication(appName);
     }
 
-    void updateAppEnv(String appName, Map<String, String> env) {
+    void updateAppEnv(String appName, Map<String, String> env) throws CloudFoundryException {
         client.updateApplicationEnv(appName, env);
     }
 

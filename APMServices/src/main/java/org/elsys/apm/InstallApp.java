@@ -1,6 +1,7 @@
 package org.elsys.apm;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
+import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.elsys.apm.dependancy.DependencyHandler;
 import org.elsys.apm.descriptor.Descriptor;
@@ -76,7 +77,7 @@ public class InstallApp {
                 throw new IllegalArgumentException("Unsupported language");
             }
 
-            DependencyHandler.handle((JSONArray) app.get("dependencies"), memory, disc);
+            DependencyHandler.handle((JSONArray) app.get("dependencies"), this, memory, disc);
 
             pushApps(con, appName, fileName, buildpackUrl, version, memory, disc);
         } catch (IOException e) {
@@ -87,16 +88,17 @@ public class InstallApp {
     private void pushApps(HttpsURLConnection con, String appName, String fileName,
                          String buildpackUrl, String version, int memory, int disc) {
         try (InputStream in = con.getInputStream()) {
-            String name = fileName.split("[^-a-zA-Z0-9]")[0].toLowerCase();
 
-            client.createApp(name, new Staging(null, buildpackUrl), disc, memory,
-                    Collections.singletonList("https://" + appName.toLowerCase() + ".cfapps.io"));
+            client.createApp(appName, new Staging(null, buildpackUrl), disc, memory,
+                    Collections.singletonList("https://cf-" + appName.toLowerCase() + ".cfapps.io"));
 
-            client.uploadApp(name, fileName, in);
+            client.uploadApp(appName, fileName, in);
 
             client.updateAppEnv(appName, ImmutableMap.of("pkgVersion", version));
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (CloudFoundryException e) {
+            System.err.println(e.getDescription());
         }
     }
 

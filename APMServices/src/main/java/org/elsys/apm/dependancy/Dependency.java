@@ -1,5 +1,6 @@
 package org.elsys.apm.dependancy;
 
+import org.elsys.apm.InstallApp;
 import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.JSONObject;
 
@@ -25,9 +26,9 @@ public class Dependency {
         return fileName;
     }
 
-    public void handle(Method method, Object... args) {
+    public void handle(Method method, InstallApp instance, Object... args) {
         try {
-            method.invoke(null, args);
+            method.invoke(instance, args);
         } catch (IllegalAccessException | InvocationTargetException ignored) {}
     }
 }
