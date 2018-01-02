@@ -1,11 +1,9 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"code.cloudfoundry.org/cli/plugin"
 	"code.cloudfoundry.org/cli/plugin/models"
@@ -41,19 +39,11 @@ func httpCall(method string, uri string, token string) (string, error) {
 	return string(bs), nil
 }
 
-func (c *client) manageApmCalls(apmCall string, httpVerb string, appName string, query ...string) (string, error) {
+func (c *client) manageApmCalls(apmCall string, httpVerb string, appName string,
+	query ...string) (string, error) {
+
 	uri := "https://" + c.app.Routes[0].Host + "." + c.app.Routes[0].Domain.Name + "/" +
 		c.org + "/" + c.space + "/" + apmCall + "/" + appName
-
-	if len(query) != 0 {
-		if query[0] != "" && query[1] != "" {
-			uri += "?" + query[0] + "&" + query[1]
-		} else if query[0] != "" {
-			uri += "?" + query[0]
-		} else if query[1] != "" {
-			uri += "?" + query[1]
-		}
-	}
 
 	resp, err := httpCall(httpVerb, uri, c.token)
 	if err != nil {
@@ -93,8 +83,9 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	client := *cl
 
 	if args[0] == "list-apps" {
-		uri := []string{"https://", client.app.Routes[0].Host, ".", client.app.Routes[0].Domain.Name, "/list_repo_apps"}
-		resp, err := httpCall("GET", strings.Join(uri, ""), client.token)
+		uri := "https://" + client.app.Routes[0].Host + "." + client.app.Routes[0].Domain.Name +
+			"/list_repo_apps"
+		resp, err := httpCall("GET", uri, client.token)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -107,19 +98,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 			fmt.Println("Incorrect usage.\nCorrect usage: cf install <app_name>")
 			return
 		}
-
-		var memFlag = flag.Int("m", 1, "-m=<value>")
-		var discFlag = flag.Int("d", 1, "-d=<value>")
-		var mem, disc string
-		flag.Parse()
-		if *memFlag != 1 {
-			mem = fmt.Sprintf("mem=%v", *memFlag)
-		}
-		if *discFlag != 1 {
-			disc = fmt.Sprintf("disc=%v", *discFlag)
-		}
-
-		resp, err := client.manageApmCalls("install", "POST", args[1], mem, disc)
+		resp, err := client.manageApmCalls("install", "POST", args[1])
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -161,7 +140,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType{
 			Major: 6,
 			Minor: 3,
-			Build: 0,
+			Build: 1,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,
