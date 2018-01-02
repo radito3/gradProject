@@ -16,31 +16,31 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-class CloudClient {
+public class CloudClient {
 
     private static final String TARGET = System.getenv("targetUrl");
 
     private CloudControllerClient client;
 
     CloudClient(String org, String space, String token) {
+        String tokenStr = token.split(" ")[1];
+
         CloudControllerClientFactory cloudFactory = new CloudControllerClientFactory(null, true);
 
-        client = cloudFactory.newCloudController(getTargetUrl(),
-                new CloudCredentials(new DefaultOAuth2AccessToken(token.split(" ")[1]), false),
-                org, space);
+        CloudCredentials credentials = new CloudCredentials(new DefaultOAuth2AccessToken(tokenStr), false);
+
+        client = cloudFactory.newCloudController(getTargetUrl(), credentials, org, space);
     }
 
     void login() {
         client.login();
     }
 
-    void uploadApp(String appName, String fileName, InputStream inputStream,
-                   UploadStatusCallback callback) throws IOException {
-        client.uploadApplication(appName, fileName, inputStream, callback);
+    void uploadApp(String appName, String fileName, InputStream inputStream) throws IOException {
+        client.uploadApplication(appName, fileName, inputStream, UploadStatusCallback.NONE);
     }
 
-    void createApp(String appName, Staging staging, Integer disk, Integer memory,
-                   List<String> uris) {
+    void createApp(String appName, Staging staging, Integer disk, Integer memory, List<String> uris) {
         client.createApplication(appName, staging, disk, memory, uris, null);
     }
 
@@ -48,7 +48,7 @@ class CloudClient {
         client.logout();
     }
 
-    CloudApplication getApp(String appName) throws CloudFoundryException {
+    public CloudApplication getApp(String appName) throws CloudFoundryException {
         return client.getApplication(appName);
     }
 
@@ -56,7 +56,7 @@ class CloudClient {
         client.deleteApplication(appName);
     }
 
-    void updateAppEnv(String appName, Map<String, String> env) {
+    void updateAppEnv(String appName, Map<String, String> env) throws CloudFoundryException {
         client.updateApplicationEnv(appName, env);
     }
 

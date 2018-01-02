@@ -1,12 +1,12 @@
 package org.elsys.apm;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
-import org.cloudfoundry.client.lib.UploadStatusCallback;
+import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.elsys.apm.dependancy.DependencyHandler;
+import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
-import org.modeshape.common.text.Inflector;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.*;
@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
-import java.util.Objects;
+import java.util.MissingResourceException;
 
 @Path("/{org}/{space}/install/{appName}")
 public class InstallApp {
@@ -31,43 +31,33 @@ public class InstallApp {
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public Response getInstallResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
+    public Response getInstallResult(@HeaderParam("access-token") String token,
+                                     @PathParam("appName") String appName,
+                                     @DefaultValue("1000") @QueryParam("mem") int memory,
+                                     @DefaultValue("1000") @QueryParam("disc") int disc) {
         client = new CloudClient(orgName, spaceName, token);
         client.login();
 
-        StringBuilder staticAppUrl = new StringBuilder(DescriptorWork.STATIC_APP_URL);
+        StringBuilder staticAppUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
         try {
-            JSONObject descr = DescriptorWork.getDescriptor(staticAppUrl.append("/descriptor.json").toString());
+            Descriptor descr = Descriptor.getDescriptor();
             JSONObject app = (JSONObject) descr.get(appName);
             if (app == null) {
                 throw new ClassNotFoundException("App " + appName + " not found");
             }
 
-            String appLang = String.valueOf(app.get("language"));
-            if (appLang.equals("null")) {
-                throw new IllegalStateException("Multi-language support not yet implemented");
-            }
+            String fileName = String.valueOf(app.get("file"));
+            staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
 
-            String buildpackUrl = getLangBuildpack(String.valueOf(appLang));
-            if (buildpackUrl.equals("Unsupported language")) {
-                throw new IllegalArgumentException("Unsupported language");
-            }
+            installApp(staticAppUrl.toString(), appName, fileName, app, memory, disc);
 
-            JSONArray files = (JSONArray) app.get("files");
-            for (Object file : files) {
-                String fileName = String.valueOf(file);
-                staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
-                installApp(staticAppUrl.toString(), appName, fileName, buildpackUrl);
-            }
-
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
+            DependencyHandler.checkDependencies(appName, client);
         } catch (ClassNotFoundException e) {
             return Response.status(404).entity(e.getMessage()).build();
-        } catch (IllegalStateException e) {
-            return Response.status(501).entity(e.getMessage()).build();
         } catch (IllegalArgumentException e) {
             return Response.status(415).entity(e.getMessage()).build();
+        } catch (MissingResourceException e) {
+            return Response.status(424).entity(e.getMessage()).build();
         } finally {
             client.logout();
         }
@@ -75,31 +65,40 @@ public class InstallApp {
         return Response.status(201).entity("App installed successfully").build();
     }
 
-    private void installApp(String uri, String appName, String fileName, String buildpackUrl) {
+    public void installApp(String uri, String appName, String fileName, JSONObject app, int memory, int disc) {
         try {
             URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-            pushApplications(con, appName, fileName, buildpackUrl);
+
+            String version = String.valueOf(app.get("pkgVersion"));
+            String appLang = String.valueOf(app.get("language"));
+            String buildpackUrl = getLangBuildpack(String.valueOf(appLang));
+            if (buildpackUrl.equals("Unsupported language")) {
+                throw new IllegalArgumentException("Unsupported language");
+            }
+
+            DependencyHandler.handle((JSONArray) app.get("dependencies"), this, memory, disc);
+
+            pushApps(con, appName, fileName, buildpackUrl, version, memory, disc);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void pushApplications(HttpsURLConnection con, String appName, String fileName, String buildpackUrl)
-            throws IOException {
-        try(InputStream in = con.getInputStream()){
+    private void pushApps(HttpsURLConnection con, String appName, String fileName,
+                         String buildpackUrl, String version, int memory, int disc) {
+        try (InputStream in = con.getInputStream()) {
 
-            String nameToUpload = Objects.equals(appName.toLowerCase(), fileName.split("-")[0].toLowerCase()) ?
-                    appName : fileName.split("-")[0];
+            client.createApp(appName, new Staging(null, buildpackUrl), disc, memory,
+                    Collections.singletonList("https://cf-" + appName.toLowerCase() + ".cfapps.io"));
 
-            String name = Inflector.getInstance().lowerCamelCase(nameToUpload);
+            client.uploadApp(appName, fileName, in);
 
-            client.createApp(name, new Staging(null, buildpackUrl), 1000, 1000,
-                    Collections.singletonList("https://" + appName.toLowerCase() + ".cfapps.io"));
-
-            client.uploadApp(name, fileName, in, UploadStatusCallback.NONE);
-
-            client.updateAppEnv(appName, ImmutableMap.of("appVersion", "1.0.0"));
+            client.updateAppEnv(appName, ImmutableMap.of("pkgVersion", version));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CloudFoundryException e) {
+            System.err.println(e.getDescription());
         }
     }
 
@@ -112,6 +111,7 @@ public class InstallApp {
             case "go": return Buildpacks.GO.getUrl();
             case "php": return Buildpacks.PHP.getUrl();
             case "hwc": return Buildpacks.HWC.getUrl();
+            case "dotnet": return Buildpacks.DOTNET.getUrl();
             default: return "Unsupported language";
         }
     }

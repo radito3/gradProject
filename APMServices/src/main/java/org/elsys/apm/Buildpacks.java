@@ -18,6 +18,11 @@ enum Buildpacks {
      */
     HWC("https://github.com/cloudfoundry/hwc-buildpack.git"),
 
+    /**
+     * .NET Core applications
+     */
+    DOTNET("https://github.com/cloudfoundry/dotnet-core-buildpack.git"),
+
     PHP("https://github.com/cloudfoundry/php-buildpack.git");
 
     private final String url;

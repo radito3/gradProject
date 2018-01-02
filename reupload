@@ -2,10 +2,12 @@
 
 echo -e "Installing apm plugin..."
 
-rm ~/Desktop/Repos/gradProject/main
+rm ~/Repos/gradProject/plugin/bin/main
 
-go build ~/Desktop/Repos/gradProject/main.go
+go build ~/Repos/gradProject/plugin/src/main.go
+
+mv ~/Repos/gradProject/main ~/Repos/gradProject/plugin/bin/
 
 cf uninstall-plugin apmPlugin
 
-cf install-plugin main
+cf install-plugin ~/Repos/gradProject/plugin/bin/main

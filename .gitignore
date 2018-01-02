@@ -1,6 +1,10 @@
-bin/
 target/
 *.jar
 *.ear
 *.class
-.*
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+APMServices/bin/
