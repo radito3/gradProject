@@ -8,7 +8,7 @@
 
 install description...
 ```
-cf install <package> [-m <memory>] [-d <disk_space>]
+cf install <package>
 ```
 
 update description...

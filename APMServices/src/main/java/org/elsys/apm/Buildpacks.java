@@ -23,7 +23,9 @@ enum Buildpacks {
      */
     DOTNET("https://github.com/cloudfoundry/dotnet-core-buildpack.git"),
 
-    PHP("https://github.com/cloudfoundry/php-buildpack.git");
+    PHP("https://github.com/cloudfoundry/php-buildpack.git"),
+    
+    BINARY("https://github.com/cloudfoundry/binary-buildpack.git");
 
     private final String url;
 

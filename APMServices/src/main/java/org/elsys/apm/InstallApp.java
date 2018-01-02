@@ -112,6 +112,7 @@ public class InstallApp {
             case "php": return Buildpacks.PHP.getUrl();
             case "hwc": return Buildpacks.HWC.getUrl();
             case "dotnet": return Buildpacks.DOTNET.getUrl();
+            case "binary": return Buildpacks.BINARY.getUrl();
             default: return "Unsupported language";
         }
     }
