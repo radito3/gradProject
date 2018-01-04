@@ -2,7 +2,7 @@
 
 echo -e "Installing application..."
 
-cf p apmServices -p ./APMServices/target/APMServices-1.0-SNAPSHOT.war --no-start
+cf p apmServices -p ./APMServices/target/APMServices-1.0-SNAPSHOT.war --no-start -b https://github.com/cloudfoundry/java-buildpack.git
 
 cf set-env apmServices staticAppUrl 'https://staticapp-hirable-phrasing.cfapps.io'
 
