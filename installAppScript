@@ -8,4 +8,6 @@ cf set-env apmServices staticAppUrl 'https://staticapp-hirable-phrasing.cfapps.i
 
 cf set-env apmServices targetUrl 'https://api.run.pivotal.io'
 
+cf set-env apmServices github 'https://raw.githubusercontent.com/radito3/gradProject/github_dwnl/packages'
+
 cf start apmServices
