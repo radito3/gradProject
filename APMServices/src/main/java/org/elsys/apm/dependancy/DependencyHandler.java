@@ -39,8 +39,7 @@ public class DependencyHandler {
             });
         } catch (NoSuchMethodException ignored) {}
     }
-
-    //this is incorrect
+    
     public static void checkDependencies(String appName, CloudClient client) throws MissingResourceException {
         JSONObject app = (JSONObject) descr.get(appName);
 
@@ -48,7 +47,6 @@ public class DependencyHandler {
 
         dpnds.forEach(d -> {
             try {
-                System.err.println("supposedly missing app : " + appName);
                 client.getApp(appName);
             } catch (CloudFoundryException e) {
                 throw new MissingResourceException("Missing dependencies", "", "");
