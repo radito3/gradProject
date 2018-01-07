@@ -9,7 +9,7 @@ import (
 	"code.cloudfoundry.org/cli/plugin/models"
 )
 
-//ApmPlugin ...
+//ApmPlugin - the plugin struct
 type ApmPlugin struct{}
 
 type client struct {
@@ -73,7 +73,7 @@ func getClient(con plugin.CliConnection) (*client, error) {
 	return &c, nil
 }
 
-//Run ...
+//Run - the plugin implementation
 func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	cl, err := getClient(cliConnection)
 	if err != nil {
@@ -133,14 +133,14 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	}
 }
 
-//GetMetadata ...
+//GetMetadata - the plugin metadata
 func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 	return plugin.PluginMetadata{
 		Name: "apmPlugin",
 		Version: plugin.VersionType{
 			Major: 6,
 			Minor: 3,
-			Build: 1,
+			Build: 2,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,
@@ -150,6 +150,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Commands: []plugin.Command{
 			{
 				Name:     "install",
+				Alias:    "i",
 				HelpText: "Command for installing apps",
 				UsageDetails: plugin.Usage{
 					Usage: "cf install <app_name>",
@@ -157,6 +158,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 			},
 			{
 				Name:     "update",
+				Alias:    "u",
 				HelpText: "Command for updating apps",
 				UsageDetails: plugin.Usage{
 					Usage: "cf update <app_name>",
@@ -164,6 +166,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 			},
 			{
 				Name:     "remove",
+				Alias:    "re",
 				HelpText: "Command for deleting apps",
 				UsageDetails: plugin.Usage{
 					Usage: "cf remove <app_name>",
@@ -171,6 +174,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 			},
 			{
 				Name:     "list-apps",
+				Alias:    "li",
 				HelpText: "Command for listing repo apps",
 				UsageDetails: plugin.Usage{
 					Usage: "cf list-apps",
