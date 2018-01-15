@@ -35,7 +35,7 @@ public class InstallApp {
                                      @PathParam("appName") String appName,
                                      @DefaultValue("1000") @QueryParam("mem") int memory,
                                      @DefaultValue("1000") @QueryParam("disc") int disc) {
-        client = new CloudClient(orgName, spaceName, token);
+        client = new CloudClientFactory(orgName, spaceName).newCloudClient(token);
         client.login();
 
         StringBuilder staticAppUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);

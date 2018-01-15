@@ -31,7 +31,7 @@ public class UpdateApp {
     @PUT
     @Produces(MediaType.TEXT_PLAIN)
     public Response getUpdateResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
-        client = new CloudClient(orgName, spaceName, token);
+        client = new CloudClientFactory(orgName, spaceName).newCloudClient(token);
         client.login();
 
         try {
@@ -77,23 +77,23 @@ public class UpdateApp {
         }
     }
 
-    private void uploadApp(JSONObject appJson, String... args) {
+    private void uploadApp(JSONObject appJson, String uri, String appName, String fileName) {
         try {
-            URL url = new URL(args[0]);
+            URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
-            pushApps(con, args[1], args[2], String.valueOf(appJson.get("pkgVersion")));
+            pushApps(con, appName, fileName, String.valueOf(appJson.get("pkgVersion")));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void pushApps(HttpsURLConnection con, String... args) throws IOException {
+    private void pushApps(HttpsURLConnection con, String appName, String fileName, String version) throws IOException {
         try (InputStream in = con.getInputStream()) {
 
-            client.uploadApp(args[0], args[1], in);
+            client.uploadApp(appName, fileName, in);
 
-            client.updateAppEnv(args[0], ImmutableMap.of("pkgVersion", args[2]));
+            client.updateAppEnv(appName, ImmutableMap.of("pkgVersion", version));
         }
     }
 
