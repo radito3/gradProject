@@ -140,7 +140,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType{
 			Major: 6,
 			Minor: 3,
-			Build: 2,
+			Build: 3,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,
@@ -166,7 +166,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 			},
 			{
 				Name:     "remove",
-				Alias:    "re",
+				Alias:    "rm",
 				HelpText: "Command for deleting apps",
 				UsageDetails: plugin.Usage{
 					Usage: "cf remove <app_name>",
