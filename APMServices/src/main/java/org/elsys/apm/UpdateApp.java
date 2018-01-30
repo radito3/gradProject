@@ -25,7 +25,7 @@ public class UpdateApp {
 
     @PathParam("space")
     private String spaceName;
-
+    // did you check if this client would be shared if two rest calls occur simultaneously 
     private CloudClient client;
 
     @PUT
