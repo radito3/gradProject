@@ -40,6 +40,7 @@ public class InstallApp {
 
         StringBuilder staticAppUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
         try {
+            //move the following few lines to Descriptor
             Descriptor descr = Descriptor.getDescriptor();
             JSONObject app = (JSONObject) descr.get(appName);
             if (app == null) {
