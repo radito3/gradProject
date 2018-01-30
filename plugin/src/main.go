@@ -1,5 +1,5 @@
 package main
-
+//the single responsibility principle can be applied here. You have a class responsible for - managing the cli plugin lifecycle, user interface, http connection initialization/calls & error handling and the binding logic inbetween (the semantics of the different commands/calls) 
 import (
 	"fmt"
 	"io/ioutil"
