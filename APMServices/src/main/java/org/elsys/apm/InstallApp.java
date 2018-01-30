@@ -68,6 +68,7 @@ public class InstallApp {
 
     public void installApp(String uri, String appName, String fileName, JSONObject app, int memory, int disc) {
         try {
+            //you can convert this logic to handling objects with behavior, instead of handling json strings. 
             URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
@@ -85,7 +86,7 @@ public class InstallApp {
             e.printStackTrace();
         }
     }
-
+//duplication ... and single responsibility
     private void pushApps(HttpsURLConnection con, String appName, String fileName,
                          String buildpackUrl, String version, int memory, int disc) {
         try (InputStream in = con.getInputStream()) {
@@ -102,7 +103,7 @@ public class InstallApp {
             System.err.println(e.getDescription());
         }
     }
-
+    //this method could be included in the Buildpacks enum
     private String getLangBuildpack(String appLang) {
         switch (appLang) {
             case "java": return Buildpacks.JAVA.getUrl();
