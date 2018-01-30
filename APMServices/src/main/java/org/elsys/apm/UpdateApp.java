@@ -25,7 +25,7 @@ public class UpdateApp {
 
     @PathParam("space")
     private String spaceName;
-    // did you check if this client would be shared if two rest calls occur simultaneously 
+    //two rest calls occur simultaneously this client won't be shared. But if you want to optimize performance, you may consider a more comlex setup with stateless rest resources and cached clients. 
     private CloudClient client;
 
     @PUT
