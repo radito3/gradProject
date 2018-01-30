@@ -15,7 +15,8 @@ public class ListApps {
     @Produces(MediaType.TEXT_PLAIN)
     public Response getListApps() {
         StringBuilder result = new StringBuilder();
-
+        
+        //move the following two lines to descriptor
         Descriptor descr = Descriptor.getDescriptor();
         descr.keySet().stream().forEach(key -> result.append(key).append('\n'));
 
