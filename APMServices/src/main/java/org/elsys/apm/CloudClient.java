@@ -22,14 +22,20 @@ public class CloudClient {
 
     private CloudControllerClient client;
 
-    CloudClient(String org, String space, String token) {
-        String tokenStr = token.split(" ")[1];
+    private CloudControllerClientFactory cloudFactory = new CloudControllerClientFactory(null, true);
 
-        CloudControllerClientFactory cloudFactory = new CloudControllerClientFactory(null, true);
+    CloudClient(String org, String space, String token) {
+        String tokenStr = token.split(" ")[1]; //input token is 'bearer <token_string>'
 
         CloudCredentials credentials = new CloudCredentials(new DefaultOAuth2AccessToken(tokenStr), false);
 
         client = cloudFactory.newCloudController(getTargetUrl(), credentials, org, space);
+    }
+
+    CloudClient(String org, String space, String user, String pass) {
+        CloudCredentials credentials = new CloudCredentials(user, pass);
+
+        client =  cloudFactory.newCloudController(getTargetUrl(), credentials, org, space);
     }
 
     void login() {
@@ -64,8 +70,7 @@ public class CloudClient {
         try {
             return new URL(TARGET);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("Invalid Target Url", e);
         }
-        return URL.class.getResource("");
     }
 }

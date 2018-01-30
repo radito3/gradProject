@@ -18,7 +18,7 @@ public final class Descriptor {
 
     private JSONObject descriptor;
 
-    public static final String DESCRIPTOR_URL = System.getenv("staticAppUrl").concat("/descriptor.json");
+    public static final String DESCRIPTOR_URL = System.getenv("github").concat("/descriptor.json");
 
     private Descriptor() {
         HttpsURLConnection con = null;

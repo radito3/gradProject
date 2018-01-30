@@ -8,7 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class Dependency {
-
+//Think how all data stored as strings in the app can be convered to stryctly typed objects
     private String name;
     private String fileName;
 

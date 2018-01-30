@@ -18,7 +18,7 @@ public class DeleteApp {
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     public Response getDeleteResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
-        CloudClient client = new CloudClient(orgName, spaceName, token);
+        CloudClient client = new CloudClientFactory(orgName, spaceName).newCloudClient(token);
         client.login();
 
         try {

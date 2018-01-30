@@ -35,11 +35,12 @@ public class InstallApp {
                                      @PathParam("appName") String appName,
                                      @DefaultValue("1000") @QueryParam("mem") int memory,
                                      @DefaultValue("1000") @QueryParam("disc") int disc) {
-        client = new CloudClient(orgName, spaceName, token);
+        client = new CloudClientFactory(orgName, spaceName).newCloudClient(token);
         client.login();
 
         StringBuilder staticAppUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
         try {
+            //move the following few lines to Descriptor
             Descriptor descr = Descriptor.getDescriptor();
             JSONObject app = (JSONObject) descr.get(appName);
             if (app == null) {
@@ -67,6 +68,7 @@ public class InstallApp {
 
     public void installApp(String uri, String appName, String fileName, JSONObject app, int memory, int disc) {
         try {
+            //you can convert this logic to handling objects with behavior, instead of handling json strings. 
             URL url = new URL(uri);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
@@ -84,7 +86,7 @@ public class InstallApp {
             e.printStackTrace();
         }
     }
-
+//duplication ... and single responsibility
     private void pushApps(HttpsURLConnection con, String appName, String fileName,
                          String buildpackUrl, String version, int memory, int disc) {
         try (InputStream in = con.getInputStream()) {
@@ -101,7 +103,7 @@ public class InstallApp {
             System.err.println(e.getDescription());
         }
     }
-
+    //this method could be included in the Buildpacks enum
     private String getLangBuildpack(String appLang) {
         switch (appLang) {
             case "java": return Buildpacks.JAVA.getUrl();

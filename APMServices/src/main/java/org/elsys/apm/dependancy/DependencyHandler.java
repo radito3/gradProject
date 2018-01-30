@@ -9,7 +9,9 @@ import org.json.simple.JSONObject;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.MissingResourceException;
+import java.util.stream.Collectors;
 
 public class DependencyHandler {
 
@@ -19,7 +21,7 @@ public class DependencyHandler {
 
     public static void handle(JSONArray dependencies1, InstallApp instance, int memory, int disc) {
 
-        if (dependencies1.isEmpty()) return; // need to test it to make sure this works correctly
+        if (dependencies1.isEmpty()) return;
 
         dependencies1.forEach(obj -> dependencies.add(new Dependency(String.valueOf(obj))));
 
@@ -39,19 +41,20 @@ public class DependencyHandler {
             });
         } catch (NoSuchMethodException ignored) {}
     }
-
-    //this is incorrect
+    
     public static void checkDependencies(String appName, CloudClient client) throws MissingResourceException {
         JSONObject app = (JSONObject) descr.get(appName);
 
-        JSONArray dpnds = (JSONArray) app.get("dependencies");
+        JSONArray dependencies = (JSONArray) app.get("dependencies");
 
-        dpnds.forEach(d -> {
+        List<String> dependenciesNames = (List<String>) dependencies.stream()
+                .map(Object::toString)
+                .collect(Collectors.toList());
+        dependenciesNames.forEach(d -> {
             try {
-                System.err.println("supposedly missing app : " + appName);
-                client.getApp(appName);
+                client.getApp(d);
             } catch (CloudFoundryException e) {
-                throw new MissingResourceException("Missing dependencies", "", "");
+                throw new MissingResourceException("Missing dependencies", appName, d);
             }
         });
     }

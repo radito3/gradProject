@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class ThreadHolder {
 
     private static volatile ThreadHolder instance;
-
+    //this seems to be a thread pool on life support
     private ExecutorService executor = Executors.newFixedThreadPool(1);
 
     private AtomicInteger count = new AtomicInteger();

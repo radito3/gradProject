@@ -97,11 +97,6 @@
             <artifactId>cloudfoundry-client-lib</artifactId>
             <version>1.1.3</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.sap.cloud.lm.sl</groupId>-->
-            <!--<artifactId>cloudfoundry-client-lib</artifactId>-->
-            <!--<version>1.1.4.RELEASE-sap-06</version>-->
-        <!--</dependency>-->
 
         <dependency>
             <groupId>org.modeshape</groupId>
@@ -112,6 +107,8 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
+            <!--this scope would exclude the junit jar from being packaged in the built war-->
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
