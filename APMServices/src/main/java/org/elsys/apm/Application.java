@@ -14,6 +14,6 @@ public class Application extends javax.ws.rs.core.Application {
     public Set<Class<?>> getClasses() {
         return Sets.newHashSet(ListApps.class, CloudClient.class, Buildpacks.class,
                 InstallApp.class, DeleteApp.class, UpdateApp.class, Descriptor.class,
-                Dependency.class, DependencyHandler.class, CloudClientFactory.class);
+                Dependency.class, DependencyHandler.class, CloudClientFactory.class, CloudApp.class);
     }
 }

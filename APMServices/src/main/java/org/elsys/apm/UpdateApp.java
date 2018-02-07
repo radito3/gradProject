@@ -4,7 +4,7 @@ import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.elsys.apm.descriptor.Descriptor;
-import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.*;
@@ -38,28 +38,29 @@ public class UpdateApp {
             CloudApplication app = client.getApp(appName);
             Descriptor descr = Descriptor.getDescriptor();
 
-            JSONObject appJson = (JSONObject) descr.get(appName);
-            if (appJson == null) {
-                throw new IllegalArgumentException("App " + appName + " no longer supported");
-            }
+            descr.checkForApp(appName);
+            CloudApp app1 = descr.getApp(appName);
 
-            List<List<Integer>> versions = getVersions(app, appJson);
+            List<List<Integer>> versions = getVersions(app, app1);
 
-            if (checkVer(versions.get(0), versions.get(1), 0)) {
-                String file = String.valueOf(appJson.get("file"));
-                StringBuilder downloadUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
-
-                downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), file);
-
-                uploadApp(appJson, downloadUrl.toString(), appName, file);
-            } else {
+            if (!checkVer(versions.get(0), versions.get(1), 0)) {
                 return Response.status(200).entity("App up-to-date").build();
             }
 
+            StringBuilder downloadUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
+            downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), app1.getFileName());
+
+            uploadApp(downloadUrl.toString(), app1);
+
         } catch (CloudFoundryException e) {
             return Response.status(404).entity("App " + appName + " not found").build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(410).entity(e.getMessage()).build();
+
+        } catch (ClassNotFoundException e) {
+            return Response.status(410).entity("App " + appName + " no longer supported").build();
+
+        } catch (IOException | ParseException e) {
+            return Response.status(500).entity(e.getMessage()).build();
+
         } finally {
             client.logout();
         }
@@ -77,29 +78,25 @@ public class UpdateApp {
         }
     }
 
-    private void uploadApp(JSONObject appJson, String uri, String appName, String fileName) {
-        try {
-            URL url = new URL(uri);
-            HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+    private void uploadApp(String uri, CloudApp app) throws IOException {
+        URL url = new URL(uri);
+        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
-            pushApps(con, appName, fileName, String.valueOf(appJson.get("pkgVersion")));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        pushApps(con, app);
     }
 
-    private void pushApps(HttpsURLConnection con, String appName, String fileName, String version) throws IOException {
+    private void pushApps(HttpsURLConnection con, CloudApp app) throws IOException {
         try (InputStream in = con.getInputStream()) {
 
-            client.uploadApp(appName, fileName, in);
+            client.uploadApp(app.getName(), app.getFileName(), in);
 
-            client.updateAppEnv(appName, ImmutableMap.of("pkgVersion", version));
+            client.updateAppEnv(app.getName(), ImmutableMap.of("pkgVersion", app.getVersion()));
         }
     }
 
-    private List<List<Integer>> getVersions(CloudApplication app, JSONObject appJson) {
-        String repoVer = String.valueOf(appJson.get("pkgVersion"));
-        String currentVer = app.getEnvAsMap().get("pkgVersion");
+    private List<List<Integer>> getVersions(CloudApplication cloudApp, CloudApp app) {
+        String repoVer = app.getVersion();
+        String currentVer = cloudApp.getEnvAsMap().get("pkgVersion");
 
         List<Integer> repoVersions = new ArrayList<>();
         List<Integer> currentVersions = new ArrayList<>();

@@ -1,5 +1,6 @@
 package org.elsys.apm.descriptor;
 
+import org.elsys.apm.CloudApp;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -20,18 +21,14 @@ public final class Descriptor {
 
     public static final String DESCRIPTOR_URL = System.getenv("github").concat("/descriptor.json");
 
-    private Descriptor() {
-        HttpsURLConnection con = null;
-        try {
-            URL url = new URL(DESCRIPTOR_URL);
-            con = (HttpsURLConnection) url.openConnection();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        descriptor = fnc(con);
+    private Descriptor() throws IOException, ParseException {
+        URL url = new URL(DESCRIPTOR_URL);
+        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+
+        descriptor = getJson(con);
     }
 
-    public static Descriptor getDescriptor() {
+    public static Descriptor getDescriptor() throws IOException, ParseException {
         if (instance == null) {
             synchronized (Descriptor.class) {
                 if (instance == null) {
@@ -42,24 +39,27 @@ public final class Descriptor {
         return instance;
     }
 
-    public Object get(Object key) {
-        return descriptor.get(key);
+    public void checkForApp(String appName) throws ClassNotFoundException {
+        if (descriptor.get(appName) == null) {
+            throw new ClassNotFoundException("App " + appName + " not found");
+        }
+    }
+
+    public CloudApp getApp(String appName) {
+        return new CloudApp((JSONObject) descriptor.get(appName));
     }
 
     public Set<?> keySet() {
         return descriptor.keySet();
     }
 
-    private JSONObject fnc(HttpsURLConnection connection) {
+    private JSONObject getJson(HttpsURLConnection connection) throws IOException, ParseException {
         try (InputStream in = connection.getInputStream()) {
-            return fnc1(in);
-        } catch (IOException e) {
-            e.printStackTrace();
+            return buildJson(in);
         }
-        return null;
     }
 
-    private JSONObject fnc1(InputStream inputStream) {
+    private JSONObject buildJson(InputStream inputStream) throws IOException, ParseException {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
 
             StringBuilder json = new StringBuilder();
@@ -71,9 +71,6 @@ public final class Descriptor {
             }
 
             return (JSONObject) parser.parse(json.toString());
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
         }
-        return null;
     }
 }

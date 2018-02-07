@@ -33,7 +33,18 @@ enum Buildpacks {
         this.url = url;
     }
 
-    String getUrl() {
-        return url;
+    static String getBuildpackUrl(String appLang) {
+        switch (appLang) {
+            case "java": return JAVA.url;
+            case "python": return PYTHON.url;
+            case "ruby": return RUBY.url;
+            case "nodejs": return NODEJS.url;
+            case "go": return GO.url;
+            case "php": return PHP.url;
+            case "hwc": return HWC.url;
+            case "dotnet": return DOTNET.url;
+            case "binary": return BINARY.url;
+            default: return "Unsupported language";
+        }
     }
 }

@@ -27,6 +27,7 @@ public class DeleteApp {
 
         } catch (CloudFoundryException e) {
             return Response.status(404).entity("App " + appName + " does not exist").build();
+
         } finally {
             client.logout();
         }

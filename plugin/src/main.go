@@ -9,7 +9,7 @@ import (
 	"code.cloudfoundry.org/cli/plugin/models"
 )
 
-//ApmPlugin - the plugin struct
+// ApmPlugin is the struct implementing the interface defined by the core CLI.
 type ApmPlugin struct{}
 
 type client struct {
@@ -73,7 +73,11 @@ func getClient(con plugin.CliConnection) (*client, error) {
 	return &c, nil
 }
 
-//Run - the plugin implementation
+// Run is the entry point when the core CLI is invoking a command defined
+// by a plugin. The first parameter, plugin.CliConnection, is a struct that can
+// be used to invoke cli commands. The second paramter, args, is a slice of
+// strings. args[0] will be the name of the command, and will be followed by
+// any additional arguments a cli user typed in.
 func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	cl, err := getClient(cliConnection)
 	if err != nil {
@@ -133,7 +137,7 @@ func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	}
 }
 
-//GetMetadata - the plugin metadata
+// GetMetadata returns a PluginMetadata struct.
 func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 	return plugin.PluginMetadata{
 		Name: "apmPlugin",

@@ -1,12 +1,10 @@
 package org.elsys.apm;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
-import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.elsys.apm.dependancy.DependencyHandler;
 import org.elsys.apm.descriptor.Descriptor;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.*;
@@ -38,26 +36,31 @@ public class InstallApp {
         client = new CloudClientFactory(orgName, spaceName).newCloudClient(token);
         client.login();
 
-        StringBuilder staticAppUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
         try {
             Descriptor descr = Descriptor.getDescriptor();
-            JSONObject app = (JSONObject) descr.get(appName);
-            if (app == null) {
-                throw new ClassNotFoundException("App " + appName + " not found");
-            }
+            descr.checkForApp(appName);
 
-            String fileName = String.valueOf(app.get("file"));
-            staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), fileName);
+            CloudApp app = descr.getApp(appName);
 
-            installApp(staticAppUrl.toString(), appName, fileName, app, memory, disc);
+            StringBuilder staticAppUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
+            staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), app.getFileName());
 
-            DependencyHandler.checkDependencies(appName, client);
+            installApp(staticAppUrl.toString(), app, memory, disc);
+
+            DependencyHandler.checkDependencies(app, client);
+
         } catch (ClassNotFoundException e) {
             return Response.status(404).entity(e.getMessage()).build();
+
         } catch (IllegalArgumentException e) {
             return Response.status(415).entity(e.getMessage()).build();
+
         } catch (MissingResourceException e) {
             return Response.status(424).entity(e.getMessage()).build();
+
+        } catch (IOException | ParseException e) {
+            return Response.status(500).entity(e.getMessage()).build();
+
         } finally {
             client.logout();
         }
@@ -65,55 +68,35 @@ public class InstallApp {
         return Response.status(201).entity("App installed successfully").build();
     }
 
-    public void installApp(String uri, String appName, String fileName, JSONObject app, int memory, int disc) {
-        try {
-            URL url = new URL(uri);
-            HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+    public void installApp(String uri, CloudApp app, int memory, int disc)
+            throws IOException, IllegalArgumentException {
 
-            String version = String.valueOf(app.get("pkgVersion"));
-            String appLang = String.valueOf(app.get("language"));
-            String buildpackUrl = getLangBuildpack(String.valueOf(appLang));
-            if (buildpackUrl.equals("Unsupported language")) {
-                throw new IllegalArgumentException("Unsupported language");
-            }
+        URL url = new URL(uri);
+        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
-            DependencyHandler.handle((JSONArray) app.get("dependencies"), this, memory, disc);
+        DependencyHandler.handle(app, this, memory, disc);
 
-            pushApps(con, appName, fileName, buildpackUrl, version, memory, disc);
-        } catch (IOException e) {
-            e.printStackTrace();
+        pushApps(con, app, memory, disc);
+    }
+
+    private void checkLanguage(String buildpackUrl) {
+        if (buildpackUrl.equals("Unsupported language")) {
+            throw new IllegalArgumentException("Unsupported language");
         }
     }
 
-    private void pushApps(HttpsURLConnection con, String appName, String fileName,
-                         String buildpackUrl, String version, int memory, int disc) {
+    private void pushApps(HttpsURLConnection con, CloudApp app, int memory, int disc) throws IOException {
         try (InputStream in = con.getInputStream()) {
 
-            client.createApp(appName, new Staging(null, buildpackUrl), disc, memory,
-                    Collections.singletonList("https://cf-" + appName.toLowerCase() + ".cfapps.io"));
+            String buildpackUrl = Buildpacks.getBuildpackUrl(app.getLanguage());
+            checkLanguage(buildpackUrl);
 
-            client.uploadApp(appName, fileName, in);
+            client.createApp(app.getName(), new Staging(null, buildpackUrl), disc, memory,
+                    Collections.singletonList("https://cf-" + app.getName().toLowerCase() + ".cfapps.io"));
 
-            client.updateAppEnv(appName, ImmutableMap.of("pkgVersion", version));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (CloudFoundryException e) {
-            System.err.println(e.getDescription());
-        }
-    }
+            client.uploadApp(app.getName(), app.getFileName(), in);
 
-    private String getLangBuildpack(String appLang) {
-        switch (appLang) {
-            case "java": return Buildpacks.JAVA.getUrl();
-            case "python": return Buildpacks.PYTHON.getUrl();
-            case "ruby": return Buildpacks.RUBY.getUrl();
-            case "nodejs": return Buildpacks.NODEJS.getUrl();
-            case "go": return Buildpacks.GO.getUrl();
-            case "php": return Buildpacks.PHP.getUrl();
-            case "hwc": return Buildpacks.HWC.getUrl();
-            case "dotnet": return Buildpacks.DOTNET.getUrl();
-            case "binary": return Buildpacks.BINARY.getUrl();
-            default: return "Unsupported language";
+            client.updateAppEnv(app.getName(), ImmutableMap.of("pkgVersion", app.getVersion()));
         }
     }
  }
