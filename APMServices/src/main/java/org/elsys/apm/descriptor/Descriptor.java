@@ -46,7 +46,7 @@ public final class Descriptor {
     }
 
     public CloudApp getApp(String appName) {
-        return new CloudApp((JSONObject) descriptor.get(appName));
+        return new CloudApp((JSONObject) descriptor.get(appName), appName);
     }
 
     public Set<?> keySet() {

@@ -11,8 +11,8 @@ public class CloudApp {
     private String fileName;
     private JSONArray dependencies;
 
-    public CloudApp(JSONObject app) {
-        this.name = String.valueOf(app);
+    public CloudApp(JSONObject app, String appName) {
+        this.name = appName;
         this.language = String.valueOf(app.get("language"));
         this.dependencies = (JSONArray) app.get("dependencies");
         this.fileName = String.valueOf(app.get("file"));
