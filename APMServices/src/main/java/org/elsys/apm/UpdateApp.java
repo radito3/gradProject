@@ -43,14 +43,16 @@ public class UpdateApp {
 
             List<List<Integer>> versions = getVersions(app, app1);
 
-            if (!checkVer(versions.get(0), versions.get(1), 0)) {
+            if (checkVer(versions.get(0), versions.get(1), 0)) {
+
+                StringBuilder downloadUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
+                downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), app1.getFileName());
+
+                uploadApp(downloadUrl.toString(), app1);
+
+            } else {
                 return Response.status(200).entity("App up-to-date").build();
             }
-
-            StringBuilder downloadUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
-            downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), app1.getFileName());
-
-            uploadApp(downloadUrl.toString(), app1);
 
         } catch (CloudFoundryException e) {
             return Response.status(404).entity("App " + appName + " not found").build();
