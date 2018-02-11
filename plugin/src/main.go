@@ -17,7 +17,7 @@ func getCommands(c client) map[string]command {
 	commands := map[string]command{
 		"install":        &install{c},
 		"update":         &update{c},
-		"remove":         &delete{c},
+		"remove":         &remove{c},
 		"list-repo":      &listRepoApps{c},
 		"list-installed": &listInstalledApps{c},
 	}

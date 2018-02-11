@@ -2,11 +2,11 @@ package main
 
 import "fmt"
 
-type delete struct {
+type remove struct {
 	cl client
 }
 
-func (c *delete) execute(args []string) error {
+func (c *remove) execute(args []string) error {
 	if len(args) != 2 {
 		return fmt.Errorf("Incorrect usage.\nCorrect usage: cf remove <app_name>")
 	}

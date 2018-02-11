@@ -4,7 +4,7 @@ echo -e "Installing apm plugin..."
 
 rm ./plugin/bin/main
 
-go build ./plugin/src/main.go
+go build ./plugin/src/main.go ./plugin/src/listRepoApps.go ./plugin/src/listInstalledApps.go ./plugin/src/install.go ./plugin/src/delete.go ./plugin/src/update.go ./plugin/src/client.go ./plugin/src/httpRequest.go
 
 mv ./main ./plugin/bin/
 
