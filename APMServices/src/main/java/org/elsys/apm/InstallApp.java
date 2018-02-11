@@ -69,7 +69,7 @@ public class InstallApp {
     }
 
     public void installApp(String uri, CloudApp app, int memory, int disc)
-            throws IOException, IllegalArgumentException {
+            throws IOException, ClassNotFoundException, ParseException, IllegalArgumentException {
 
         URL url = new URL(uri);
         HttpsURLConnection con = (HttpsURLConnection) url.openConnection();

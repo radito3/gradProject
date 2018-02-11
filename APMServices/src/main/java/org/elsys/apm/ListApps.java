@@ -3,19 +3,18 @@ package org.elsys.apm;
 import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.parser.ParseException;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 
-@Path("/list_repo_apps")
+@Path("/{org}/{space}/list_apps")
 public class ListApps {
 
     @GET
+    @Path("/repo")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response getListApps() {
+    public Response getRepoApps() {
         StringBuilder result = new StringBuilder();
 
         try {
@@ -25,6 +24,20 @@ public class ListApps {
         } catch (IOException | ParseException e) {
             return Response.status(500).entity(e.getMessage()).build();
         }
+
+        return Response.status(200).entity(result.toString()).build();
+    }
+
+    @GET
+    @Path("/installed")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response getInstalledApps(@HeaderParam("access-token") String token,
+                                     @PathParam("org") String org, @PathParam("space") String space) {
+        StringBuilder result = new StringBuilder();
+
+        CloudClient client = new CloudClientFactory(org, space).newCloudClient(token);
+
+        client.getApps().forEach(app -> result.append(app.getName()).append('\n'));
 
         return Response.status(200).entity(result.toString()).build();
     }

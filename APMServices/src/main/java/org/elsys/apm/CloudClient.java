@@ -66,6 +66,10 @@ public class CloudClient {
         client.updateApplicationEnv(appName, env);
     }
 
+    List<CloudApplication> getApps() {
+        return client.getApplications();
+    }
+
     private URL getTargetUrl() {
         try {
             return new URL(TARGET);

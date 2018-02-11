@@ -3,6 +3,7 @@ package org.elsys.apm;
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.elsys.apm.dependancy.DependencyHandler;
 import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.parser.ParseException;
 
@@ -16,6 +17,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.MissingResourceException;
 
 @Path("/{org}/{space}/update/{appName}")
 public class UpdateApp {
@@ -60,6 +62,9 @@ public class UpdateApp {
         } catch (ClassNotFoundException e) {
             return Response.status(410).entity("App " + appName + " no longer supported").build();
 
+        } catch (MissingResourceException e) {
+            return Response.status(424).entity(e.getMessage()).build();
+
         } catch (IOException | ParseException e) {
             return Response.status(500).entity(e.getMessage()).build();
 
@@ -80,9 +85,11 @@ public class UpdateApp {
         }
     }
 
-    private void uploadApp(String uri, CloudApp app) throws IOException {
+    private void uploadApp(String uri, CloudApp app) throws IOException, MissingResourceException {
         URL url = new URL(uri);
         HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+
+        DependencyHandler.checkDependencies(app, client);
 
         pushApps(con, app);
     }

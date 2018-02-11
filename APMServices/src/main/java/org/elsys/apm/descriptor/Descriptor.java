@@ -45,7 +45,10 @@ public final class Descriptor {
         }
     }
 
-    public CloudApp getApp(String appName) {
+    public CloudApp getApp(String appName) throws ClassNotFoundException {
+        if (descriptor.get(appName) == null) {
+            throw new ClassNotFoundException("Missing package " + appName);
+        }
         return new CloudApp((JSONObject) descriptor.get(appName), appName);
     }
 

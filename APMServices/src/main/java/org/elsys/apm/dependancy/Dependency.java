@@ -13,14 +13,9 @@ public class Dependency {
 
     private CloudApp app;
 
-    public Dependency(String appName) {
-        System.err.println(appName);
-        //need to check for existing app!!!
-        try {
-            this.app = Descriptor.getDescriptor().getApp(appName);
-        } catch (IOException | ParseException e) {
-            e.printStackTrace(); //need to handle this
-        }
+    public Dependency(String appName) throws IOException, ParseException, ClassNotFoundException {
+
+        this.app = Descriptor.getDescriptor().getApp(appName);
     }
 
     public String getFileName() {

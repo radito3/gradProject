@@ -6,7 +6,9 @@ import org.elsys.apm.CloudClient;
 import org.elsys.apm.InstallApp;
 import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +19,14 @@ public class DependencyHandler {
 
     private static ArrayList<Dependency> dependencies = new ArrayList<>();
 
-    public static void handle(CloudApp app, InstallApp instance, int memory, int disc) {
+    public static void handle(CloudApp app, InstallApp instance, int memory, int disc)
+            throws IOException, ParseException, ClassNotFoundException {
 
         if (!app.hasDependencies()) return;
 
-        app.getDependencies().forEach(obj -> dependencies.add(new Dependency(String.valueOf(obj))));
+        for (Object o : app.getDependencies()) {
+            dependencies.add(new Dependency(String.valueOf(o)));
+        }
 
         try {
             Class<?>[] parameters = { String.class, CloudApp.class, int.class, int.class };
