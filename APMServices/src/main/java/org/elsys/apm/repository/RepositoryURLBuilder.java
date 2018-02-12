@@ -29,7 +29,7 @@ public class RepositoryURLBuilder {
             throw new NullPointerException("File name is null");
         }
 
-        Pattern pattern = Pattern.compile("[^-.a-zA-Z0-9]");
+        Pattern pattern = Pattern.compile("[^-_.a-zA-Z0-9]");
         if (pattern.matcher(file).find()) {
             throw new IllegalArgumentException("Illegal characters in file name");
         }
