@@ -1,10 +1,14 @@
-package org.elsys.apm;
+package org.elsys.apm.rest;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.elsys.apm.dependancy.DependencyHandler;
+import org.elsys.apm.CloudClient;
+import org.elsys.apm.CloudClientFactory;
+import org.elsys.apm.dependency.DependencyHandler;
 import org.elsys.apm.descriptor.Descriptor;
+import org.elsys.apm.model.CloudApp;
+import org.elsys.apm.repository.RepositoryURLBuilder;
 import org.json.simple.parser.ParseException;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -47,10 +51,9 @@ public class UpdateApp {
 
             if (checkVer(versions.get(0), versions.get(1), 0)) {
 
-                StringBuilder downloadUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
-                downloadUrl.replace(downloadUrl.lastIndexOf("/") + 1, downloadUrl.length(), app1.getFileName());
+                RepositoryURLBuilder fileUrl = new RepositoryURLBuilder();
 
-                uploadApp(downloadUrl.toString(), app1);
+                uploadApp(fileUrl.repoRoot().target(app1.getFileName()).build(), app1);
 
             } else {
                 return Response.status(200).entity("App up-to-date").build();
@@ -85,8 +88,7 @@ public class UpdateApp {
         }
     }
 
-    private void uploadApp(String uri, CloudApp app) throws IOException, MissingResourceException {
-        URL url = new URL(uri);
+    private void uploadApp(URL url, CloudApp app) throws IOException, MissingResourceException {
         HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
         DependencyHandler.checkDependencies(app, client);

@@ -1,4 +1,4 @@
-package org.elsys.apm;
+package org.elsys.apm.model;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

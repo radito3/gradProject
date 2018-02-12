@@ -1,5 +1,7 @@
-package org.elsys.apm;
+package org.elsys.apm.rest;
 
+import org.elsys.apm.CloudClient;
+import org.elsys.apm.CloudClientFactory;
 import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.parser.ParseException;
 

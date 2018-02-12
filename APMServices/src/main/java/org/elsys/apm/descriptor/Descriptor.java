@@ -1,6 +1,7 @@
 package org.elsys.apm.descriptor;
 
-import org.elsys.apm.CloudApp;
+import org.elsys.apm.model.CloudApp;
+import org.elsys.apm.repository.RepositoryURLBuilder;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -19,10 +20,8 @@ public final class Descriptor {
 
     private JSONObject descriptor;
 
-    public static final String DESCRIPTOR_URL = System.getenv("github").concat("/descriptor.json");
-
     private Descriptor() throws IOException, ParseException {
-        URL url = new URL(DESCRIPTOR_URL);
+        URL url = new RepositoryURLBuilder().repoRoot().repoDescriptor().build();
         HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
         descriptor = getJson(con);

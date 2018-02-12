@@ -38,19 +38,19 @@ public class CloudClient {
         client =  cloudFactory.newCloudController(getTargetUrl(), credentials, org, space);
     }
 
-    void login() {
+    public void login() {
         client.login();
     }
 
-    void uploadApp(String appName, String fileName, InputStream inputStream) throws IOException {
+    public void uploadApp(String appName, String fileName, InputStream inputStream) throws IOException {
         client.uploadApplication(appName, fileName, inputStream, UploadStatusCallback.NONE);
     }
 
-    void createApp(String appName, Staging staging, Integer disk, Integer memory, List<String> uris) {
+    public void createApp(String appName, Staging staging, Integer disk, Integer memory, List<String> uris) {
         client.createApplication(appName, staging, disk, memory, uris, null);
     }
 
-    void logout() {
+    public void logout() {
         client.logout();
     }
 
@@ -58,15 +58,15 @@ public class CloudClient {
         return client.getApplication(appName);
     }
 
-    void deleteApp(String appName) {
+    public void deleteApp(String appName) {
         client.deleteApplication(appName);
     }
 
-    void updateAppEnv(String appName, Map<String, String> env) throws CloudFoundryException {
+    public void updateAppEnv(String appName, Map<String, String> env) throws CloudFoundryException {
         client.updateApplicationEnv(appName, env);
     }
 
-    List<CloudApplication> getApps() {
+    public List<CloudApplication> getApps() {
         return client.getApplications();
     }
 

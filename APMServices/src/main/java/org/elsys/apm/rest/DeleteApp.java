@@ -1,6 +1,8 @@
-package org.elsys.apm;
+package org.elsys.apm.rest;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.elsys.apm.CloudClient;
+import org.elsys.apm.CloudClientFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

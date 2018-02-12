@@ -1,15 +1,16 @@
-package org.elsys.apm.dependancy;
+package org.elsys.apm.dependency;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.elsys.apm.CloudApp;
+import org.elsys.apm.model.CloudApp;
 import org.elsys.apm.CloudClient;
-import org.elsys.apm.InstallApp;
-import org.elsys.apm.descriptor.Descriptor;
+import org.elsys.apm.repository.RepositoryURLBuilder;
+import org.elsys.apm.rest.InstallApp;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingResourceException;
@@ -29,15 +30,14 @@ public class DependencyHandler {
         }
 
         try {
-            Class<?>[] parameters = { String.class, CloudApp.class, int.class, int.class };
+            Class<?>[] parameters = { URL.class, CloudApp.class, int.class, int.class };
             Method push = InstallApp.class.getDeclaredMethod("installApp", parameters);
 
-            dependencies.forEach(d -> {
-                StringBuilder url = new StringBuilder(Descriptor.DESCRIPTOR_URL);
-                url.replace(url.lastIndexOf("/") + 1, url.length(), d.getFileName());
+            for (Dependency d : dependencies) {
+                RepositoryURLBuilder url = new RepositoryURLBuilder();
 
-                d.handle(push, instance, url.toString(), memory, disc);
-            });
+                d.handle(push, instance, url.repoRoot().target(d.getFileName()).build(), memory, disc);
+            }
 
         } catch (NoSuchMethodException ignored) {}
     }

@@ -1,9 +1,14 @@
-package org.elsys.apm;
+package org.elsys.apm.rest;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.cloudfoundry.client.lib.domain.Staging;
-import org.elsys.apm.dependancy.DependencyHandler;
+import org.elsys.apm.CloudClient;
+import org.elsys.apm.CloudClientFactory;
+import org.elsys.apm.dependency.DependencyHandler;
 import org.elsys.apm.descriptor.Descriptor;
+import org.elsys.apm.model.Buildpacks;
+import org.elsys.apm.model.CloudApp;
+import org.elsys.apm.repository.RepositoryURLBuilder;
 import org.json.simple.parser.ParseException;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -42,10 +47,9 @@ public class InstallApp {
 
             CloudApp app = descr.getApp(appName);
 
-            StringBuilder staticAppUrl = new StringBuilder(Descriptor.DESCRIPTOR_URL);
-            staticAppUrl.replace(staticAppUrl.lastIndexOf("/") + 1, staticAppUrl.length(), app.getFileName());
+            RepositoryURLBuilder fileUrl = new RepositoryURLBuilder();
 
-            installApp(staticAppUrl.toString(), app, memory, disc);
+            installApp(fileUrl.repoRoot().target(app.getFileName()).build(), app, memory, disc);
 
             DependencyHandler.checkDependencies(app, client);
 
@@ -68,10 +72,9 @@ public class InstallApp {
         return Response.status(201).entity("App installed successfully").build();
     }
 
-    public void installApp(String uri, CloudApp app, int memory, int disc)
+    public void installApp(URL url, CloudApp app, int memory, int disc)
             throws IOException, ClassNotFoundException, ParseException, IllegalArgumentException {
 
-        URL url = new URL(uri);
         HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
         DependencyHandler.handle(app, this, memory, disc);
