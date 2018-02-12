@@ -16,7 +16,7 @@
     "todo-list-elsys": {
         "file": "TodoList-1.0-SNAPSHOT.war",
         "dependencies": [],
-        "pkgVersion": "1.2.2",
+        "pkgVersion": "1.2.5",
         "language": "java"
     }
 }
