@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 func httpCall(method string, uri string, token string) (string, error) {
@@ -13,7 +14,7 @@ func httpCall(method string, uri string, token string) (string, error) {
 		return "", err
 	}
 
-	req.Header.Set("access-token", token)
+	req.Header.Set("access-token", strings.Split(token, " ")[1])
 
 	resp, err := client.Do(req)
 	if err != nil {

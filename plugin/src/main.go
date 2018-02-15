@@ -14,14 +14,13 @@ type command interface {
 }
 
 func getCommands(c client) map[string]command {
-	commands := map[string]command{
+	return map[string]command{
 		"install":        &install{c},
 		"update":         &update{c},
 		"remove":         &remove{c},
 		"list-repo":      &listRepoApps{c},
 		"list-installed": &listInstalledApps{c},
 	}
-	return commands
 }
 
 // Run is the entry point when the core CLI is invoking a command defined
@@ -55,7 +54,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Name: "apmPlugin",
 		Version: plugin.VersionType{
 			Major: 7,
-			Minor: 0,
+			Minor: 1,
 			Build: 0,
 		},
 		MinCliVersion: plugin.VersionType{

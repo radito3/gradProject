@@ -25,9 +25,7 @@ public class CloudClient {
     private CloudControllerClientFactory cloudFactory = new CloudControllerClientFactory(null, true);
 
     CloudClient(String org, String space, String token) {
-        String tokenStr = token.split(" ")[1]; //input token is 'bearer <token_string>'
-
-        CloudCredentials credentials = new CloudCredentials(new DefaultOAuth2AccessToken(tokenStr), false);
+        CloudCredentials credentials = new CloudCredentials(new DefaultOAuth2AccessToken(token), false);
 
         client = cloudFactory.newCloudController(getTargetUrl(), credentials, org, space);
     }
