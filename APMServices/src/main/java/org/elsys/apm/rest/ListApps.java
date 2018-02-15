@@ -5,7 +5,11 @@ import org.elsys.apm.CloudClientFactory;
 import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.parser.ParseException;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -37,7 +41,8 @@ public class ListApps {
                                      @PathParam("org") String org, @PathParam("space") String space) {
         StringBuilder result = new StringBuilder();
 
-        CloudClient client = new CloudClientFactory(org, space).newCloudClient(token);
+        CloudClientFactory factory = new CloudClientFactory(org, space);
+        CloudClient client = factory.newCloudClient(token);
 
         client.getApps().forEach(app -> result.append(app.getName()).append('\n'));
 

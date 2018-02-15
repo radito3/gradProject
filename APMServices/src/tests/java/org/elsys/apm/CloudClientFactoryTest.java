@@ -5,9 +5,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class CloudClientFactoryTest {
@@ -19,13 +20,18 @@ public class CloudClientFactoryTest {
     private CloudClientFactory factoryMock;
 
     @Test
-    public void newClientTest() {
+    public void newClientTokenTest() {
         when(factoryMock.newCloudClient(anyString())).thenReturn(clientMock);
-        verify(factoryMock).newCloudClient(anyString());
-        assertNotNull(factoryMock.newCloudClient(anyString()));
 
+        assertNotNull(factoryMock.newCloudClient(anyString()));
+        assertEquals(factoryMock.newCloudClient(anyString()), clientMock);
+    }
+
+    @Test
+    public void newClientPassTest() {
         when(factoryMock.newCloudClient(anyString(), anyString())).thenReturn(clientMock);
-        verify(factoryMock).newCloudClient(anyString(), anyString());
+
         assertNotNull(factoryMock.newCloudClient(anyString(), anyString()));
+        assertEquals(factoryMock.newCloudClient(anyString(), anyString()), clientMock);
     }
 }

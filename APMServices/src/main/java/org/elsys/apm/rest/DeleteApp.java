@@ -4,7 +4,11 @@ import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.elsys.apm.CloudClient;
 import org.elsys.apm.CloudClientFactory;
 
-import javax.ws.rs.*;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.Path;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -20,7 +24,9 @@ public class DeleteApp {
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     public Response getDeleteResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
-        CloudClient client = new CloudClientFactory(orgName, spaceName).newCloudClient(token);
+        CloudClientFactory factory = new CloudClientFactory(orgName, spaceName);
+        CloudClient client = factory.newCloudClient(token);
+
         client.login();
 
         try {

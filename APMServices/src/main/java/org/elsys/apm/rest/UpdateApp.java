@@ -12,7 +12,11 @@ import org.elsys.apm.repository.RepositoryURLBuilder;
 import org.json.simple.parser.ParseException;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.ws.rs.*;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -37,23 +41,25 @@ public class UpdateApp {
     @PUT
     @Produces(MediaType.TEXT_PLAIN)
     public Response getUpdateResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
-        client = new CloudClientFactory(orgName, spaceName).newCloudClient(token);
+        CloudClientFactory factory = new CloudClientFactory(orgName, spaceName);
+        client = factory.newCloudClient(token);
+
         client.login();
 
         try {
-            CloudApplication app = client.getApp(appName);
+            CloudApplication cloudApp = client.getApp(appName);
             Descriptor descr = Descriptor.getDescriptor();
-
             descr.checkForApp(appName);
-            CloudApp app1 = descr.getApp(appName);
 
-            List<List<Integer>> versions = getVersions(app, app1);
+            CloudApp app = descr.getApp(appName);
+            List<List<Integer>> versions = getVersions(cloudApp, app);
 
             if (checkVer(versions.get(0), versions.get(1), 0)) {
 
-                RepositoryURLBuilder fileUrl = new RepositoryURLBuilder();
+                RepositoryURLBuilder urlBuilderl = new RepositoryURLBuilder();
+                URL fileUrl = urlBuilderl.repoRoot().target(app.getFileName()).build();
 
-                uploadApp(fileUrl.repoRoot().target(app1.getFileName()).build(), app1);
+                uploadApp(fileUrl, app);
 
             } else {
                 return Response.status(200).entity("App up-to-date").build();

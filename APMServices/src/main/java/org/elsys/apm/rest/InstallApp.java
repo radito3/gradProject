@@ -12,7 +12,13 @@ import org.elsys.apm.repository.RepositoryURLBuilder;
 import org.json.simple.parser.ParseException;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.ws.rs.*;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -38,7 +44,9 @@ public class InstallApp {
                                      @PathParam("appName") String appName,
                                      @DefaultValue("1000") @QueryParam("mem") int memory,
                                      @DefaultValue("1000") @QueryParam("disc") int disc) {
-        client = new CloudClientFactory(orgName, spaceName).newCloudClient(token);
+        CloudClientFactory factory = new CloudClientFactory(orgName, spaceName);
+        client = factory.newCloudClient(token);
+
         client.login();
 
         try {
@@ -47,9 +55,10 @@ public class InstallApp {
 
             CloudApp app = descr.getApp(appName);
 
-            RepositoryURLBuilder fileUrl = new RepositoryURLBuilder();
+            RepositoryURLBuilder urlBuilder = new RepositoryURLBuilder();
+            URL fileUrl = urlBuilder.repoRoot().target(app.getFileName()).build();
 
-            installApp(fileUrl.repoRoot().target(app.getFileName()).build(), app, memory, disc);
+            installApp(fileUrl, app, memory, disc);
 
             DependencyHandler.checkDependencies(app, client);
 
