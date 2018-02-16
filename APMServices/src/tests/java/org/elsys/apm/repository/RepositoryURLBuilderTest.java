@@ -1,69 +1,83 @@
 package org.elsys.apm.repository;
 
+import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 public class RepositoryURLBuilderTest {
 
+    private RepositoryURLBuilder builder;
+
+    @Before
+    public void createBuilder() {
+        builder = new RepositoryURLBuilder();
+    }
+
     @Test
     public void getRepoRootUrl() {
-        RepositoryURLBuilder factory = new RepositoryURLBuilder();
-        assertNotNull(factory.repoRoot());
+        assertNotNull(builder.repoRoot());
+    }
+
+    @Test
+    public void getDesciptor() {
+        assertNotNull(builder.repoDescriptor());
     }
 
     @Test
     public void getRepoRootUrlIsBuilder() {
-        RepositoryURLBuilder factory = new RepositoryURLBuilder();
-        assertTrue(factory.repoRoot() instanceof RepositoryURLBuilder);
+        assertTrue(builder.repoRoot() instanceof RepositoryURLBuilder);
     }
 
     @Test
     public void getRepoRootUrlBuilt() throws MalformedURLException {
-        RepositoryURLBuilder factory = new RepositoryURLBuilder();
-        assertTrue(factory.repoRoot().build() instanceof URL);
+        assertTrue(builder.repoRoot().build() instanceof URL);
     }
 
     @Test
     public void getRepoRootUrlContent() throws MalformedURLException {
-        RepositoryURLBuilder factory = new RepositoryURLBuilder();
-        URL url = factory.repoRoot().build();
+        URL url = builder.repoRoot().build();
         assertEquals("https", url.getProtocol());
         assertEquals("raw.githubusercontent.com", url.getHost());
         assertEquals("/radito3/gradProject/github_dwnl/packages", url.getPath());
     }
 
     @Test
-    public void getDescriptorUrlContent() throws MalformedURLException {
-        RepositoryURLBuilder factory = new RepositoryURLBuilder();
-        assertEquals(new URL(RepositoryURLBuilder.REPO_URL.concat("/descriptor.json")),
-                factory.repoRoot().repoDescriptor().build());
+    public void getDescriptorUrlContent() throws IOException {
+        URL actual = builder.repoRoot().repoDescriptor().build();
+
+        RepositoryURLBuilder builder1 = new RepositoryURLBuilder();
+        URL expected = new URL(builder1.repoRoot().repoDescriptor().build(), "");
+
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void getFileUrlTest() throws MalformedURLException {
-        RepositoryURLBuilder factory = new RepositoryURLBuilder();
-        assertEquals(new URL(RepositoryURLBuilder.REPO_URL.concat("/my-file")),
-                factory.repoRoot().target("my-file").build());
+    public void getFileUrlTest() throws IOException {
+        URL actual = builder.repoRoot().target("my-file_").build();
+
+        RepositoryURLBuilder builder1 = new RepositoryURLBuilder();
+        URL expected = new URL(builder1.repoRoot().target("my-file_").build(), "");
+
+        assertEquals(expected, actual);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getFileUrlFailsTest() {
-        RepositoryURLBuilder factory = new RepositoryURLBuilder();
-        assertNotNull(factory.target("myFi\\|\\/!@#$%^&*()_le"));
+        builder.target("myFi\\|\\/!@#$%^&*()_le");
     }
 
     @Test
     public void getFileUrlWrongExceptionTest() {
-        RepositoryURLBuilder factory = new RepositoryURLBuilder();
         try {
-            assertNotNull(factory.target("myFi\\|\\/!@#$%^&*()_le"));
+            builder.target("myFi\\|\\/!@#$%^&*()_le");
             fail("An exception should have been thrown") ;
         } catch (IllegalArgumentException e) {
             assertEquals("Illegal characters in file name", e.getMessage());
@@ -72,15 +86,13 @@ public class RepositoryURLBuilderTest {
 
     @Test(expected = NullPointerException.class)
     public void getNullFileTest() {
-        RepositoryURLBuilder factory = new RepositoryURLBuilder();
-        assertNotNull(factory.target(null));
+        assertNotNull(builder.target(null));
     }
 
     @Test
     public void getNullFileWrongExceptionTest() {
-        RepositoryURLBuilder factory = new RepositoryURLBuilder();
         try {
-            assertNotNull(factory.target(null));
+            builder.target(null);
             fail("An exception should have been thrown") ;
         } catch (NullPointerException e) {
             assertEquals("File name is null", e.getMessage());

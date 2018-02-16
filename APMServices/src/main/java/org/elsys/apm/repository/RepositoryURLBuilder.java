@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public class RepositoryURLBuilder {
 
-    public static final String REPO_URL = System.getenv("github");
+    private final String REPO_URL = System.getenv("github");
 
     private StringBuilder urlString;
 
@@ -24,7 +24,7 @@ public class RepositoryURLBuilder {
         return this;
     }
 
-    public RepositoryURLBuilder target(String file) throws IllegalArgumentException, NullPointerException {
+    public RepositoryURLBuilder target(String file) throws IllegalArgumentException {
         if (file == null) {
             throw new NullPointerException("File name is null");
         }

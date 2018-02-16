@@ -34,9 +34,10 @@ public class DependencyHandler {
             Method push = InstallApp.class.getDeclaredMethod("installApp", parameters);
 
             for (Dependency d : dependencies) {
-                RepositoryURLBuilder url = new RepositoryURLBuilder();
+                RepositoryURLBuilder urlBuilder = new RepositoryURLBuilder();
+                URL url = urlBuilder.repoRoot().target(d.getFileName()).build();
 
-                d.handle(push, instance, url.repoRoot().target(d.getFileName()).build(), memory, disc);
+                d.handle(push, instance, url, memory, disc);
             }
 
         } catch (NoSuchMethodException ignored) {}
