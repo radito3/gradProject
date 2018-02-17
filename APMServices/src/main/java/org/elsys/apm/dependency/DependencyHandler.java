@@ -1,8 +1,8 @@
 package org.elsys.apm.dependency;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.elsys.apm.model.CloudApp;
 import org.elsys.apm.CloudClient;
+import org.elsys.apm.model.CloudApp;
 import org.elsys.apm.repository.RepositoryURLBuilder;
 import org.elsys.apm.rest.InstallApp;
 import org.json.simple.JSONArray;
@@ -53,6 +53,7 @@ public class DependencyHandler {
         dependenciesNames.forEach(d -> {
             try {
                 client.getApp(d);
+                System.err.println(d);
             } catch (CloudFoundryException e) {
                 throw new MissingResourceException("Missing dependencies", app.getName(), d);
             }

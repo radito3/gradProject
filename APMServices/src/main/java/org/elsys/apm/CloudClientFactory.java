@@ -11,10 +11,10 @@ public class CloudClientFactory {
     }
 
     public CloudClient newCloudClient(String token) {
-        return new CloudClient(org, space, token);
+        return new CloudClientImpl(org, space, token);
     }
 
     public CloudClient newCloudClient(String user, String pass) {
-        return new CloudClient(org, space, user, pass);
+        return new CloudClientImpl(org, space, user, pass);
     }
 }
