@@ -53,7 +53,6 @@ public class DependencyHandler {
         dependenciesNames.forEach(d -> {
             try {
                 client.getApp(d);
-                System.err.println(d);
             } catch (CloudFoundryException e) {
                 throw new MissingResourceException("Missing dependencies", app.getName(), d);
             }

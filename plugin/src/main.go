@@ -29,14 +29,13 @@ func getCommands(c client) map[string]command {
 // strings. args[0] will be the name of the command, and will be followed by
 // any additional arguments a cli user typed in.
 func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
-	cl, err := getClient(cliConnection)
+	client, err := getClient(cliConnection)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	client := *cl
 
-	commands := getCommands(client)
+	commands := getCommands(*client)
 
 	for key, command := range commands {
 		if args[0] == key {
@@ -55,7 +54,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType{
 			Major: 7,
 			Minor: 1,
-			Build: 0,
+			Build: 1,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,
