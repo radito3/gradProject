@@ -40,12 +40,11 @@ public class ApplicationUploader implements Installable {
 
             if (client.checkForExistingApp(obj.toString())) continue;
 
-            //this needs to happen in threads for better performance
             Descriptor descr = Descriptor.getDescriptor();
             CloudApp dependency = descr.getApp(obj.toString());
+
             install(dependency, DEFAULT_MEMORY, DEFAULT_DISC);
         }
-
     }
 
     @Override
