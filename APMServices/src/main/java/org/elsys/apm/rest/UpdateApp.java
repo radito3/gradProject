@@ -1,14 +1,12 @@
 package org.elsys.apm.rest;
 
-import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.elsys.apm.ApplicationUploader;
 import org.elsys.apm.CloudClient;
 import org.elsys.apm.CloudClientFactory;
-import org.elsys.apm.dependency.DependencyHandler;
 import org.elsys.apm.descriptor.Descriptor;
 import org.elsys.apm.model.CloudApp;
-import org.elsys.apm.repository.RepositoryURLBuilder;
 import org.json.simple.parser.ParseException;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -20,8 +18,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,13 +32,11 @@ public class UpdateApp {
     @PathParam("space")
     private String spaceName;
 
-    private CloudClient client;
-
     @PUT
     @Produces(MediaType.TEXT_PLAIN)
     public Response getUpdateResult(@HeaderParam("access-token") String token, @PathParam("appName") String appName) {
         CloudClientFactory factory = new CloudClientFactory(orgName, spaceName);
-        client = factory.newCloudClient(token);
+        CloudClient client = factory.newCloudClient(token);
 
         client.login();
 
@@ -56,10 +50,11 @@ public class UpdateApp {
 
             if (checkVer(versions.get(0), versions.get(1), 0)) {
 
-                RepositoryURLBuilder urlBuilderl = new RepositoryURLBuilder();
-                URL fileUrl = urlBuilderl.repoRoot().target(app.getFileName()).build();
+                ApplicationUploader uploader = new ApplicationUploader(client);
 
-                uploadApp(fileUrl, app);
+                uploader.checkDependencies(app);
+
+                uploader.upload(client, (HttpsURLConnection) app.getFileUrl().openConnection(), app);
 
             } else {
                 return Response.status(200).entity("App up-to-date").build();
@@ -91,23 +86,6 @@ public class UpdateApp {
             return false;
         } else {
             return checkVer(currentVers, repoVers, depth + 1);
-        }
-    }
-
-    private void uploadApp(URL url, CloudApp app) throws IOException, MissingResourceException {
-        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-
-        DependencyHandler.checkDependencies(app, client);
-
-        pushApps(con, app);
-    }
-
-    private void pushApps(HttpsURLConnection con, CloudApp app) throws IOException {
-        try (InputStream in = con.getInputStream()) {
-
-            client.uploadApp(app.getName(), app.getFileName(), in);
-
-            client.updateAppEnv(app.getName(), ImmutableMap.of("pkgVersion", app.getVersion()));
         }
     }
 

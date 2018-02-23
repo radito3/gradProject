@@ -14,7 +14,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Set;
 
-public final class Descriptor {
+public class Descriptor {
 
     private static volatile Descriptor instance;
 
@@ -27,13 +27,9 @@ public final class Descriptor {
         descriptor = getJson(con);
     }
 
-    public static Descriptor getDescriptor() throws IOException, ParseException {
+    public static synchronized Descriptor getDescriptor() throws IOException, ParseException {
         if (instance == null) {
-            synchronized (Descriptor.class) {
-                if (instance == null) {
-                    instance = new Descriptor();
-                }
-            }
+            instance = new Descriptor();
         }
         return instance;
     }

@@ -21,6 +21,8 @@ public interface CloudClient {
 
     CloudApplication getApp(String appName) throws CloudFoundryException;
 
+    boolean checkForExistingApp(String appName);
+
     void deleteApp(String appName);
 
     void updateAppEnv(String appName, Map<String, String> env) throws CloudFoundryException;

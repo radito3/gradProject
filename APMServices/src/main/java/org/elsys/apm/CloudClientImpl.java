@@ -62,6 +62,16 @@ public class CloudClientImpl implements CloudClient {
     }
 
     @Override
+    public boolean checkForExistingApp(String appName) {
+        try {
+            getApp(appName);
+        } catch (CloudFoundryException e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public void deleteApp(String appName) {
         client.deleteApplication(appName);
     }

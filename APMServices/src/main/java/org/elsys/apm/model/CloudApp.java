@@ -1,14 +1,22 @@
 package org.elsys.apm.model;
 
+import org.elsys.apm.repository.RepositoryURLBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class CloudApp {
 
     private String name;
+
     private String language;
+
     private String version;
+
     private String fileName;
+
     private JSONArray dependencies;
 
     public CloudApp(JSONObject app, String appName) {
@@ -41,5 +49,12 @@ public class CloudApp {
 
     public JSONArray getDependencies() {
         return dependencies;
+    }
+
+    public URL getFileUrl() throws MalformedURLException {
+
+        RepositoryURLBuilder urlBuilder = new RepositoryURLBuilder();
+
+        return urlBuilder.repoRoot().target(fileName).build();
     }
 }
