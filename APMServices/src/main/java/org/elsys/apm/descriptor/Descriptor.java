@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class Descriptor {
 
-    private static volatile Descriptor instance;
+    private static Descriptor instance;
 
     private JSONObject descriptor;
 
@@ -27,7 +27,7 @@ public class Descriptor {
         descriptor = getJson(con);
     }
 
-    public static synchronized Descriptor getDescriptor() throws IOException, ParseException {
+    public static Descriptor getDescriptor() throws IOException, ParseException {
         if (instance == null) {
             instance = new Descriptor();
         }

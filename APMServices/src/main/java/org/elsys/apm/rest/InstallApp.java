@@ -17,7 +17,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.MissingResourceException;
 
 @Path("/{org}/{space}/install/{appName}")
 public class InstallApp {
@@ -49,14 +48,14 @@ public class InstallApp {
 
             uploader.install(app, memory, disc);
 
+        } catch (ApplicationUploader.ExistingAppException e) {
+            return Response.status(400).entity(e.getMessage()).build();
+
         } catch (ClassNotFoundException e) {
             return Response.status(404).entity(e.getMessage()).build();
 
         } catch (IllegalArgumentException e) {
             return Response.status(415).entity(e.getMessage()).build();
-
-        } catch (MissingResourceException e) {
-            return Response.status(424).entity(e.getMessage()).build();
 
         } catch (IOException | ParseException e) {
             return Response.status(500).entity(e.getMessage()).build();

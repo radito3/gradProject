@@ -31,6 +31,10 @@ public class ApplicationUploader implements Installable {
     public void install(CloudApp app, int memory, int disc)
             throws IOException, ParseException, ClassNotFoundException {
 
+        if (client.checkForExistingApp(app.getName())) {
+            throw new ExistingAppException("App already exists");
+        }
+
         create(client, app, memory, disc);
         upload(client, (HttpsURLConnection) app.getFileUrl().openConnection(), app);
 
@@ -56,5 +60,12 @@ public class ApplicationUploader implements Installable {
                 throw new MissingResourceException("Missing dependencies", app.getName(), d.toString());
             }
         });
+    }
+
+    public class ExistingAppException extends RuntimeException {
+
+        ExistingAppException(String message) {
+            super(message);
+        }
     }
 }
