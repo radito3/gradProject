@@ -31,24 +31,29 @@ chmod 755 ./scripts/uploadPlugin
  
 ## Usage
 
-install description...
+Install a package
 ```
 cf install <package>
 ```
 
-update description...
+Update a package
 ```
 cf update <package>
 ```
 
-delete description...
+Delete a package
 ```
 cf remove <package>
 ```
 
-list description...
+List installed apps
 ```
-cf list-apps
+cf list-installed
+```
+
+List repository apps
+```
+cf list-repo
 ```
 
 ## Contribute 
