@@ -24,6 +24,7 @@ public class BuildpacksTest {
         languages.add("php");
         languages.add("php");
         languages.add("binary");
+        languages.add("staticfile");
     }
 
     @Test

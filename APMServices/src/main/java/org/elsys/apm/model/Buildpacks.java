@@ -25,7 +25,9 @@ public enum Buildpacks {
 
     PHP("https://github.com/cloudfoundry/php-buildpack.git"),
     
-    BINARY("https://github.com/cloudfoundry/binary-buildpack.git");
+    BINARY("https://github.com/cloudfoundry/binary-buildpack.git"),
+
+    STATICFILE("https://github.com/cloudfoundry/staticfile-buildpack.git");
 
     private final String url;
 
@@ -44,6 +46,7 @@ public enum Buildpacks {
             case "hwc": return HWC.url;
             case "dotnet": return DOTNET.url;
             case "binary": return BINARY.url;
+            case "staticfile": return STATICFILE.url;
             default: return "Unsupported language";
         }
     }
