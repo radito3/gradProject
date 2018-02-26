@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo -e "Setting environment variable on test-app-one..."
+
+cf set-env test-app-one restServiceTwoUri 'https://cf-test-app-two.cfapps.io/rest/Test'
+
+cf restage test-app-one
