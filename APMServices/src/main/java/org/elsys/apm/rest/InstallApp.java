@@ -42,14 +42,15 @@ public class InstallApp {
             Descriptor descr = Descriptor.getDescriptor();
             descr.checkForApp(appName);
 
+            if (client.checkForExistingApp(appName)) {
+                return Response.status(400).entity("App already exists").build();
+            }
+
             CloudApp app = descr.getApp(appName);
 
             ApplicationUploader uploader = new ApplicationUploader(client);
 
             uploader.install(app, memory, disc);
-
-        } catch (ApplicationUploader.ExistingAppException e) {
-            return Response.status(400).entity(e.getMessage()).build();
 
         } catch (ClassNotFoundException e) {
             return Response.status(404).entity(e.getMessage()).build();
@@ -66,4 +67,5 @@ public class InstallApp {
 
         return Response.status(201).entity("App installed successfully").build();
     }
+
  }
