@@ -2,14 +2,12 @@
 
 echo -e "Installing application..."
 
-cf p apmServices -p ./APMServices/target/APMServices-1.0-SNAPSHOT.war --no-start -b https://github.com/cloudfoundry/java-buildpack.git > /dev/null
+cf p apmServices -p ./APMServices/target/APMServices-1.0-SNAPSHOT.war --no-start -b https://github.com/cloudfoundry/java-buildpack.git
 
-cf set-env apmServices staticAppUrl 'https://staticapp-hirable-phrasing.cfapps.io' > /dev/null
+cf set-env apmServices targetUrl 'https://api.run.pivotal.io'
 
-cf set-env apmServices targetUrl 'https://api.run.pivotal.io' > /dev/null
+cf set-env apmServices github 'https://raw.githubusercontent.com/radito3/gradProject/github_dwnl/packages'
 
-cf set-env apmServices github 'https://raw.githubusercontent.com/radito3/gradProject/github_dwnl/packages' > /dev/null
-
-cf start apmServices > /dev/null
+cf start apmServices
 
 echo -e "CF Package Manager installed"
