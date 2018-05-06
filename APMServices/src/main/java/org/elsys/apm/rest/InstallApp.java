@@ -22,6 +22,7 @@ import java.io.IOException;
 @Path("/{org}/{space}/install")
 public class InstallApp {
 
+    // these needn't be outside the function
     @PathParam("org")
     private String orgName;
 
