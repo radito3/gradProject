@@ -1,5 +1,8 @@
 package org.elsys.apm.model;
 
+/**
+ * An Enum with the available language buildpack urls
+ */
 public enum Buildpacks {
 
     JAVA("https://github.com/cloudfoundry/java-buildpack.git"),
@@ -35,6 +38,12 @@ public enum Buildpacks {
         this.url = url;
     }
 
+    /**
+     * Get the buildpack url
+     *
+     * @param appLang The application language
+     * @return The url
+     */
     static public String getBuildpackUrl(String appLang) {
         switch (appLang) {
             case "java": return JAVA.url;

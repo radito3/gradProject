@@ -14,6 +14,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 
+/**
+ * Handles the REST calls for listing applications.
+ *
+ * @author Rangel Ivanov
+ */
 @Path("/{org}/{space}/list_apps")
 public class ListApps {
 
