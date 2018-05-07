@@ -1,11 +1,7 @@
 package org.elsys.apm.rest;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.elsys.apm.CloudClient;
 import org.elsys.apm.CloudClientFactory;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.Consumes;
@@ -17,44 +13,34 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Class for handling REST calls for deleting applications.
+ * Class for handling the REST calls for deleting applications.
  *
  * @author Rangel Ivanov
  */
 @Path("/{org}/{space}/delete")
-public class DeleteApp {
-
-    @PathParam("org")
-    private String orgName;
-
-    @PathParam("space")
-    private String spaceName;
+public class DeleteApp extends AbstractRestHandler {
 
     /**
      * Deletes an application and returns the result of the operation
      *
      * @param authType The authentication type
      * @param appName The name of the application to be deleted
+     * @param orgName The organisation name
+     * @param spaceName The space name
      * @param request The Json containing the authentication information
-     * @return The response of the operation
-     * @throws ParseException If the request is an invalid Json
+     * @return A Json containing the result of the operation
      */
     @DELETE
     @Path("/{appName}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getDeleteResult(@HeaderParam("auth-type") String authType,
                                     @PathParam("appName") String appName,
-                                    String request) throws ParseException {
+                                    @PathParam("org") String orgName,
+                                    @PathParam("space") String spaceName,
+                                    String request) {
         CloudClientFactory factory = new CloudClientFactory(orgName, spaceName);
-        CloudClient client;
-        JSONObject json = (JSONObject) new JSONParser().parse(request);
-
-        if (authType.equals("token")) {
-            client = factory.newCloudClient(json.get("token").toString());
-        } else {
-            client = factory.newCloudClient(json.get("user").toString(), json.get("pass").toString());
-        }
+        createClient(factory, request, authType);
 
         client.login();
 
@@ -63,12 +49,12 @@ public class DeleteApp {
             client.deleteApp(appName);
 
         } catch (CloudFoundryException e) {
-            return Response.status(404).entity("App " + appName + " does not exist").build();
+            return Response.status(404).entity(errorMessage("App " + appName + " does not exist")).build();
 
         } finally {
             client.logout();
         }
 
-        return Response.status(200).entity("App deleted").build();
+        return Response.status(200).entity(successMessage("App deleted")).build();
     }
 }
