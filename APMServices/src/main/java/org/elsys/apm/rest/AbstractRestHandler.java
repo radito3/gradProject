@@ -9,12 +9,12 @@ public abstract class AbstractRestHandler {
     protected CloudClient client;
 
     protected final MessageFormat template = new MessageFormat("{\"error\":\"{0}\"," +
-            "\"message\":\"{1}\"}");
+            "\"result\":\"{1}\",\"apps\":{2}}");
 
     protected void createClient() {
 
 
-        template.format(new Object[]{"", "test-message"});
+        template.format(new Object[]{"", "test-message", ""});
     }
 
     //TODO Add JavaDoc documentation to all classes
@@ -22,5 +22,4 @@ public abstract class AbstractRestHandler {
     //TODO Implement usage of this abstract class which should be a superclass for all rest handlers
     //TODO The message template of this class must be used for consistency in all the rest responses
     //TODO The createClient() function should be used for the creation of the CloudClient to avoid redundancy
-    //TODO <Maybe> Add an API for uploading applications to the official repository
 }

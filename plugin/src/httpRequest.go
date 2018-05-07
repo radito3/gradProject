@@ -8,6 +8,7 @@ import (
 
 func httpCall(method string, uri string, token string) (string, error) {
 	client := &http.Client{}
+
 	var repl = strings.Replace
 	var split = strings.Split
 	const template = "{\"token\":\"<tkn>\",\"user\":\"<user>\",\"pass\":\"<pass>\"}"

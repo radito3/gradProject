@@ -22,7 +22,7 @@ import java.io.IOException;
  * @author Rangel Ivanov
  */
 @Path("/{org}/{space}/list_apps")
-public class ListApps {
+public class ListApps extends AbstractRestHandler {
 
     /**
      * Get the repository applications
@@ -33,18 +33,18 @@ public class ListApps {
     @Path("/repo")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRepoApps() {
-        StringBuilder result = new StringBuilder("\"apps\":[");
+        StringBuilder result = new StringBuilder("[");
 
         try {
             Descriptor descr = Descriptor.getDescriptor();
             descr.keySet().forEach(key -> result.append('\"').append(key).append("\","));
 
         } catch (IOException | ParseException e) {
-            return Response.status(500).entity(e.getMessage()).build();
+            return Response.status(500).entity(template.format(new Object[]{e.getMessage(), "", ""})).build();
         }
 
-        return Response.status(200).entity(
-                result.replace(result.lastIndexOf(","), result.length(), "]").toString()).build();
+        String output = result.replace(result.lastIndexOf(","), result.length(), "]").toString();
+        return Response.status(200).entity(template.format(new Object[]{"", "", output})).build();
     }
 
     /**
@@ -64,7 +64,7 @@ public class ListApps {
                                      @PathParam("org") String org, @PathParam("space") String space,
                                      String request) throws ParseException {
         CloudClientFactory factory = new CloudClientFactory(org, space);
-        StringBuilder result = new StringBuilder("\"apps\"");
+        StringBuilder result = new StringBuilder("[");
         CloudClient client;
         JSONObject json = (JSONObject) new JSONParser().parse(request);
 
