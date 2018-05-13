@@ -58,10 +58,10 @@ public class UpdateApp extends AbstractRestHandler {
             CloudApp app = descr.getApp(appName);
             List<List<Integer>> versions = getVersions(cloudApp, app);
 
-            if (checkVer(versions.get(0), versions.get(1), 0)) {
-                ApplicationUploader uploader = new ApplicationUploader(client);
-                uploader.checkDependencies(app);
+            ApplicationUploader uploader = new ApplicationUploader(client);
+            uploader.checkDependencies(app);
 
+            if (checkVer(versions.get(0), versions.get(1), 0)) {
                 uploader.upload(client, (HttpsURLConnection) app.getFileUrl().openConnection(), app);
             } else {
                 return Response.status(200).entity(successMessage("App up-to-date")).build();
