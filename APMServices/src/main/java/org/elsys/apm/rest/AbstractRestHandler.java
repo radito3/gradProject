@@ -64,6 +64,4 @@ public abstract class AbstractRestHandler {
     protected String successMessage(String message) {
         return template.format(new Object[]{"", message, ""});
     }
-
-    //TODO Add JavaDoc documentation to all classes
 }

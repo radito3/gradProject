@@ -18,6 +18,8 @@ import java.util.Set;
  * Class representing the repository descriptor file.
  * Contains information about repository files.
  * Implements the Singleton design pattern.
+ *
+ * @author Rangel Ivanov
  */
 public class Descriptor {
 

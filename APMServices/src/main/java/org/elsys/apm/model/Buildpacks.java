@@ -1,7 +1,9 @@
 package org.elsys.apm.model;
 
 /**
- * An Enum with the available language buildpack urls
+ * An Enum with the available language buildpack urls.
+ *
+ * @author Rangel Ivanov
  */
 public enum Buildpacks {
 

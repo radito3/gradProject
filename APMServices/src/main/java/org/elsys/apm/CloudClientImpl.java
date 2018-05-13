@@ -16,6 +16,11 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The implementation class for the CloudClient interface.
+ *
+ * @author Rangel Ivanov
+ */
 public class CloudClientImpl implements CloudClient {
 
     private static final String TARGET = System.getenv("targetUrl");

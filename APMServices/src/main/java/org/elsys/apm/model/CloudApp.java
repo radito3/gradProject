@@ -9,6 +9,8 @@ import java.net.URL;
 
 /**
  * Class representing the model for Cloud applications.
+ *
+ * @author Rangel Ivanov
  */
 public class CloudApp {
 
