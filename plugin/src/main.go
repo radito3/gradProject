@@ -51,7 +51,7 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType{
 			Major: 7,
 			Minor: 3,
-			Build: 0,
+			Build: 8,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,

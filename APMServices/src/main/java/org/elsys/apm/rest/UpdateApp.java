@@ -40,7 +40,7 @@ public class UpdateApp extends AbstractRestHandler {
     @Path("/{appName}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUpdateResult(@HeaderParam("access-token") String authType,
+    public Response getUpdateResult(@HeaderParam("auth-type") String authType,
                                     @PathParam("appName") String appName,
                                     @PathParam("org") String orgName,
                                     @PathParam("space") String spaceName,

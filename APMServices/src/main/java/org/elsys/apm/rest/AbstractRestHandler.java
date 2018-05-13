@@ -6,8 +6,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.text.MessageFormat;
-
 /**
  * Superclass to all REST handlers.
  * Contains the Json template for the responses.
@@ -18,8 +16,7 @@ public abstract class AbstractRestHandler {
 
     protected CloudClient client;
 
-    protected final MessageFormat template = new MessageFormat("{\"error\":\"{0}\"," +
-            "\"result\":\"{1}\",\"apps\":{2}}");
+    protected final String template = "{\"error\":\"%s\",\"result\":\"%s\",\"apps\":%s}";
 
     /**
      * Creates the {@link CloudClient} object that the REST handlers use
@@ -52,7 +49,7 @@ public abstract class AbstractRestHandler {
      * @return The Json
      */
     protected String errorMessage(String message) {
-        return template.format(new Object[]{message, "", ""});
+        return String.format(template, message, "", "[]");
     }
 
     /**
@@ -62,6 +59,6 @@ public abstract class AbstractRestHandler {
      * @return The Json
      */
     protected String successMessage(String message) {
-        return template.format(new Object[]{"", message, ""});
+        return String.format(template, "", message, "[]");
     }
 }

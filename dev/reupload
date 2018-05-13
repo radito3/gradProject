@@ -2,12 +2,12 @@
 
 echo -e "Installing apm plugin..."
 
-rm ./plugin/bin/main
+rm ./../plugin/bin/main
 
-go build ./plugin/src/main.go ./plugin/src/listRepoApps.go ./plugin/src/listInstalledApps.go ./plugin/src/install.go ./plugin/src/delete.go ./plugin/src/update.go ./plugin/src/client.go ./plugin/src/httpRequest.go
+go build ./../plugin/src/main.go ./../plugin/src/listRepoApps.go ./../plugin/src/listInstalledApps.go ./../plugin/src/install.go ./../plugin/src/delete.go ./../plugin/src/update.go ./../plugin/src/client.go ./../plugin/src/httpRequest.go
 
-mv ./main ./plugin/bin/
+mv ./main ./../plugin/bin/
 
 cf uninstall-plugin apmPlugin
 
-cf install-plugin ./plugin/bin/main
+cf install-plugin ./../plugin/bin/main

@@ -37,7 +37,7 @@ public class ListApps extends AbstractRestHandler {
         }
 
         String output = result.replace(result.lastIndexOf(","), result.length(), "]").toString();
-        return Response.status(200).entity(template.format(new Object[]{"", "", output})).build();
+        return Response.status(200).entity(String.format(template, "", "", output)).build();
     }
 
     /**
@@ -64,6 +64,6 @@ public class ListApps extends AbstractRestHandler {
         client.getApps().forEach(app -> result.append('\"').append(app.getName()).append("\","));
 
         String output = result.replace(result.lastIndexOf(","), result.length(), "]").toString();
-        return Response.status(200).entity(template.format(new Object[]{"", "", output})).build();
+        return Response.status(200).entity(String.format(template, "", "", output)).build();
     }
 }

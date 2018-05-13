@@ -15,10 +15,10 @@ type client struct {
 	app   plugin_models.GetAppModel
 }
 
-type response struct {
-	error   string   `json:"error"`
-	message string   `json:"message"`
-	apps    []string `json:"apps"`
+type Response struct {
+	Error   string   `json:"error"`
+	Message string   `json:"result"`
+	Apps    []string `json:"apps"`
 }
 
 func (c *client) manageApmCalls(apmCall string, httpVerb string, appName string,
@@ -32,17 +32,17 @@ func (c *client) manageApmCalls(apmCall string, httpVerb string, appName string,
 		return "", err
 	}
 
-	var res response
-	if err := json.NewDecoder(strings.NewReader(resp)).Decode(&res); err != nil {
+	var res Response
+	if err := json.Unmarshal([]byte(resp), &res); err != nil {
 		return "", err
 	}
 
-	if len(res.error) != 0 {
-		return "", fmt.Errorf(res.error)
-	} else if len(res.apps) != 0 {
-		return strings.Join(res.apps, "\n"), nil
+	if len(res.Error) != 0 {
+		return "", fmt.Errorf(res.Error)
+	} else if len(res.Apps) != 0 {
+		return strings.Join(res.Apps, "\n"), nil
 	} else {
-		return res.message, nil
+		return res.Message, nil
 	}
 }
 
