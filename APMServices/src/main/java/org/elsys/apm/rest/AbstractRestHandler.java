@@ -29,7 +29,7 @@ public abstract class AbstractRestHandler {
         if (client == null) {
             JSONObject json = null;
             try {
-                json = (JSONObject) new JSONParser().parse(request);
+                json = (JSONObject) (new JSONParser()).parse(request);
             } catch (ParseException ignored) {}
 
             assert json != null;

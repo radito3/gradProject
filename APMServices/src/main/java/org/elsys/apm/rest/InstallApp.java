@@ -75,4 +75,4 @@ public class InstallApp extends AbstractRestHandler {
         return Response.status(201).entity(successMessage("App installed successfully")).build();
     }
 
- }
+}
