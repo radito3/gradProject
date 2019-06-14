@@ -1,71 +1,89 @@
 package org.elsys.apm;
 
-import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.lib.UploadStatusCallback;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.Staging;
-import org.cloudfoundry.client.lib.rest.CloudControllerClient;
-import org.cloudfoundry.client.lib.rest.CloudControllerClientFactory;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-public class CloudClient {
+/**
+ * The Cloud Client interface with which the CloudFoundry API functions are called.
+ *
+ * @author Rangel Ivanov
+ */
+public interface CloudClient {
 
-    private static final String TARGET = System.getenv("targetUrl");
+    /**
+     * Log in to the CloudFoundry profile using the given credentials
+     */
+    void login();
 
-    private CloudControllerClient client;
+    /**
+     * Upload an application to CloudFoundry
+     *
+     * @param appName The application name
+     * @param fileName The file name to be uploaded
+     * @param inputStream The input stream of data
+     * @throws IOException If there is an IO error
+     */
+    void uploadApp(String appName, String fileName, InputStream inputStream) throws IOException;
 
-    CloudClient(String org, String space, String token) {
-        String tokenStr = token.split(" ")[1];
+    /**
+     * Create an application in CloudFoundry
+     *
+     * @param appName The application name
+     * @param staging The Staging object with which to stage the app
+     * @param disk The disc space
+     * @param memory The operating memory
+     * @param uris A List of uris upon which the application may be called
+     */
+    void createApp(String appName, Staging staging, Integer disk, Integer memory, List<String> uris);
 
-        CloudControllerClientFactory cloudFactory = new CloudControllerClientFactory(null, true);
+    /**
+     * Log out of the CloudFoundry profile
+     */
+    void logout();
 
-        CloudCredentials credentials = new CloudCredentials(new DefaultOAuth2AccessToken(tokenStr), false);
+    /**
+     * Get an application from a designated org and space
+     *
+     * @param appName The application name
+     * @return The {@link CloudApplication} object representing the application
+     * @throws CloudFoundryException If the app does not exist
+     */
+    CloudApplication getApp(String appName) throws CloudFoundryException;
 
-        client = cloudFactory.newCloudController(getTargetUrl(), credentials, org, space);
-    }
+    /**
+     * Check if a given application exists in the designated org and space
+     *
+     * @param appName The application name to check
+     * @return True if it exists, false otherwise
+     */
+    boolean checkForExistingApp(String appName);
 
-    void login() {
-        client.login();
-    }
+    /**
+     * Delete an application in the designated org and space
+     *
+     * @param appName The application name to be deleted
+     */
+    void deleteApp(String appName);
 
-    void uploadApp(String appName, String fileName, InputStream inputStream) throws IOException {
-        client.uploadApplication(appName, fileName, inputStream, UploadStatusCallback.NONE);
-    }
+    /**
+     * Update an application environment
+     *
+     * @param appName The application name
+     * @param env A {@link Map} containing the new key value pairs to be added
+     * @throws CloudFoundryException If there is an error with the environment map
+     */
+    void updateAppEnv(String appName, Map<String, String> env) throws CloudFoundryException;
 
-    void createApp(String appName, Staging staging, Integer disk, Integer memory, List<String> uris) {
-        client.createApplication(appName, staging, disk, memory, uris, null);
-    }
-
-    void logout() {
-        client.logout();
-    }
-
-    public CloudApplication getApp(String appName) throws CloudFoundryException {
-        return client.getApplication(appName);
-    }
-
-    void deleteApp(String appName) {
-        client.deleteApplication(appName);
-    }
-
-    void updateAppEnv(String appName, Map<String, String> env) throws CloudFoundryException {
-        client.updateApplicationEnv(appName, env);
-    }
-
-    private URL getTargetUrl() {
-        try {
-            return new URL(TARGET);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        return URL.class.getResource("");
-    }
+    /**
+     * Get the current installed applications from the designated org and space
+     *
+     * @return A List with the Cloud Applications
+     */
+    List<CloudApplication> getApps();
 }

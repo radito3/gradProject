@@ -1,4 +1,6 @@
-target/
+APMServices/target/**/
+target/APMServices-1.0-SNAPSHOT/
+dev/TestApps/**/target/
 *.jar
 *.ear
 *.class

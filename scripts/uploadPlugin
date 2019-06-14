@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo -e "Installing apm plugin..."
+
+cf install-plugin ./plugin/bin/main
