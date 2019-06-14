@@ -7,6 +7,11 @@ import org.json.simple.JSONObject;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * Class representing the model for Cloud applications.
+ *
+ * @author Rangel Ivanov
+ */
 public class CloudApp {
 
     private String name;

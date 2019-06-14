@@ -16,6 +16,12 @@ import org.elsys.apm.rest.UpdateApp;
 import javax.ws.rs.ApplicationPath;
 import java.util.Set;
 
+/**
+ * Sets the base path for the Application.
+ * Configures the classes used in the Application.
+ *
+ * @author Rangel Ivanov
+ */
 @ApplicationPath("/")
 public class Application extends javax.ws.rs.core.Application {
 

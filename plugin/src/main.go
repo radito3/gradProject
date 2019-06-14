@@ -1,10 +1,7 @@
 package main
 
-import (
-	"fmt"
-
-	"code.cloudfoundry.org/cli/plugin"
-)
+import "fmt"
+import "code.cloudfoundry.org/cli/plugin"
 
 // ApmPlugin is the struct implementing the interface defined by the core CLI.
 type ApmPlugin struct{}
@@ -25,7 +22,7 @@ func getCommands(c client) map[string]command {
 
 // Run is the entry point when the core CLI is invoking a command defined
 // by a plugin. The first parameter, plugin.CliConnection, is a struct that can
-// be used to invoke cli commands. The second paramter, args, is a slice of
+// be used to invoke cli commands. The second parameter, args, is a slice of
 // strings. args[0] will be the name of the command, and will be followed by
 // any additional arguments a cli user typed in.
 func (c *ApmPlugin) Run(cliConnection plugin.CliConnection, args []string) {
@@ -53,8 +50,8 @@ func (c *ApmPlugin) GetMetadata() plugin.PluginMetadata {
 		Name: "apmPlugin",
 		Version: plugin.VersionType{
 			Major: 7,
-			Minor: 1,
-			Build: 1,
+			Minor: 3,
+			Build: 8,
 		},
 		MinCliVersion: plugin.VersionType{
 			Major: 6,

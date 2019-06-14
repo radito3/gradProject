@@ -9,12 +9,18 @@ import (
 func httpCall(method string, uri string, token string) (string, error) {
 	client := &http.Client{}
 
-	req, err := http.NewRequest(method, uri, nil)
+	var repl = strings.Replace
+	var split = strings.Split
+	const template = "{\"token\":\"<tkn>\",\"user\":\"<user>\",\"pass\":\"<pass>\"}"
+
+	body := strings.NewReader(repl(template, "<tkn>", split(token, " ")[1], 1))
+
+	req, err := http.NewRequest(method, uri, body)
 	if err != nil {
 		return "", err
 	}
 
-	req.Header.Set("access-token", strings.Split(token, " ")[1])
+	req.Header.Set("auth-type", "token")
 
 	resp, err := client.Do(req)
 	if err != nil {

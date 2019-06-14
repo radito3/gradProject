@@ -1,51 +1,69 @@
 package org.elsys.apm.rest;
 
-import org.elsys.apm.CloudClient;
 import org.elsys.apm.CloudClientFactory;
 import org.elsys.apm.descriptor.Descriptor;
 import org.json.simple.parser.ParseException;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 
+/**
+ * Class for handling the REST calls for listing applications.
+ *
+ * @author Rangel Ivanov
+ */
 @Path("/{org}/{space}/list_apps")
-public class ListApps {
+public class ListApps extends AbstractRestHandler {
 
+    /**
+     * Get the repository applications
+     *
+     * @return A Json representing the applications
+     */
     @GET
     @Path("/repo")
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getRepoApps() {
-        StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder("[");
 
         try {
             Descriptor descr = Descriptor.getDescriptor();
-            descr.keySet().forEach(key -> result.append(key).append('\n'));
+            descr.keySet().forEach(key -> result.append('\"').append(key).append("\","));
 
         } catch (IOException | ParseException e) {
-            return Response.status(500).entity(e.getMessage()).build();
+            return Response.status(500).entity(errorMessage(e.getMessage())).build();
         }
 
-        return Response.status(200).entity(result.toString()).build();
+        String output = result.replace(result.lastIndexOf(","), result.length(), "]").toString();
+        return Response.status(200).entity(String.format(template, "", "", output)).build();
     }
 
+    /**
+     * Get the currently installed applications
+     *
+     * @param authType The authentication type
+     * @param org The organisation name
+     * @param space The space name
+     * @param request The Json containing the authentication information
+     * @return A Json containing the applications
+     */
     @GET
     @Path("/installed")
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response getInstalledApps(@HeaderParam("access-token") String token,
-                                     @PathParam("org") String org, @PathParam("space") String space) {
-        StringBuilder result = new StringBuilder();
-
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getInstalledApps(@HeaderParam("auth-type") String authType,
+                                     @PathParam("org") String org,
+                                     @PathParam("space") String space,
+                                     String request) {
         CloudClientFactory factory = new CloudClientFactory(org, space);
-        CloudClient client = factory.newCloudClient(token);
+        createClient(factory, request, authType);
+        StringBuilder result = new StringBuilder("[");
 
-        client.getApps().forEach(app -> result.append(app.getName()).append('\n'));
+        client.getApps().forEach(app -> result.append('\"').append(app.getName()).append("\","));
 
-        return Response.status(200).entity(result.toString()).build();
+        String output = result.replace(result.lastIndexOf(","), result.length(), "]").toString();
+        return Response.status(200).entity(String.format(template, "", "", output)).build();
     }
 }

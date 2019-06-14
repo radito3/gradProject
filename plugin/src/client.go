@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
+	"strings"
 	"code.cloudfoundry.org/cli/plugin"
 	"code.cloudfoundry.org/cli/plugin/models"
+	"fmt"
 )
 
 type client struct {
@@ -10,6 +13,12 @@ type client struct {
 	space string
 	token string
 	app   plugin_models.GetAppModel
+}
+
+type Response struct {
+	Error   string   `json:"error"`
+	Message string   `json:"result"`
+	Apps    []string `json:"apps"`
 }
 
 func (c *client) manageApmCalls(apmCall string, httpVerb string, appName string,
@@ -23,7 +32,18 @@ func (c *client) manageApmCalls(apmCall string, httpVerb string, appName string,
 		return "", err
 	}
 
-	return resp, nil
+	var res Response
+	if err := json.Unmarshal([]byte(resp), &res); err != nil {
+		return "", err
+	}
+
+	if len(res.Error) != 0 {
+		return "", fmt.Errorf(res.Error)
+	} else if len(res.Apps) != 0 {
+		return strings.Join(res.Apps, "\n"), nil
+	} else {
+		return res.Message, nil
+	}
 }
 
 func getClient(con plugin.CliConnection) (*client, error) {
@@ -47,6 +67,5 @@ func getClient(con plugin.CliConnection) (*client, error) {
 		return nil, err
 	}
 
-	c := client{org: org.Name, space: space.Name, token: token, app: app}
-	return &c, nil
+	return &client{org.Name, space.Name, token, app}, nil
 }

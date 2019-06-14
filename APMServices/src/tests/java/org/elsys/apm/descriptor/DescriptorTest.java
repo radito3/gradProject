@@ -6,7 +6,6 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class DescriptorTest {
 
@@ -14,7 +13,6 @@ public class DescriptorTest {
     public void constructionTest() throws IOException, ParseException {
         Descriptor descriptor = Descriptor.getDescriptor();
         assertNotNull(descriptor);
-        assertTrue(descriptor instanceof Descriptor);
     }
 
     @Test(expected = ClassNotFoundException.class)

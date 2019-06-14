@@ -14,6 +14,13 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Set;
 
+/**
+ * Class representing the repository descriptor file.
+ * Contains information about repository files.
+ * Implements the Singleton design pattern.
+ *
+ * @author Rangel Ivanov
+ */
 public class Descriptor {
 
     private static Descriptor instance;
@@ -27,6 +34,13 @@ public class Descriptor {
         descriptor = getJson(con);
     }
 
+    /**
+     * Get the Singleton instance
+     *
+     * @return The instance
+     * @throws IOException If an error occurred during creating the InputStream from the HTTP request
+     * @throws ParseException If an error occurred during the building of the JSONObject
+     */
     public static Descriptor getDescriptor() throws IOException, ParseException {
         if (instance == null) {
             instance = new Descriptor();
@@ -34,12 +48,25 @@ public class Descriptor {
         return instance;
     }
 
+    /**
+     * Checks if an application exists in the repository
+     *
+     * @param appName The name of the application to be checked
+     * @throws ClassNotFoundException If the application does not exist
+     */
     public void checkForApp(String appName) throws ClassNotFoundException {
         if (descriptor.get(appName) == null) {
             throw new ClassNotFoundException("App " + appName + " not found");
         }
     }
 
+    /**
+     * Get an application
+     *
+     * @param appName The application name
+     * @return The {@link CloudApp} object representing the app
+     * @throws ClassNotFoundException If the application is not found
+     */
     public CloudApp getApp(String appName) throws ClassNotFoundException {
         if (descriptor.get(appName) == null) {
             throw new ClassNotFoundException("Missing package " + appName);
@@ -53,22 +80,18 @@ public class Descriptor {
 
     private JSONObject getJson(HttpsURLConnection connection) throws IOException, ParseException {
         try (InputStream in = connection.getInputStream()) {
-            return buildJson(in);
-        }
-    }
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
 
-    private JSONObject buildJson(InputStream inputStream) throws IOException, ParseException {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+                StringBuilder json = new StringBuilder();
+                JSONParser parser = new JSONParser();
 
-            StringBuilder json = new StringBuilder();
-            JSONParser parser = new JSONParser();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    json.append(line).append('\n');
+                }
 
-            String line;
-            while ((line = br.readLine()) != null) {
-                json.append(line).append('\n');
+                return (JSONObject) parser.parse(json.toString());
             }
-
-            return (JSONObject) parser.parse(json.toString());
         }
     }
 }
